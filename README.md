@@ -8,7 +8,7 @@ Placeholder — detailed environment setup and installation steps will be docume
 
 ## Architecture
 
-Placeholder — system architecture, data pipelines, and core components will be documented in later phases.
+See [ARCHITECTURE.md](file:///c:/AI_Engineer/personalized-weekly-digest-engine/ARCHITECTURE.md) for the complete system architecture, data models, ranking formulas, summarizer strategies, API contracts, and deployment topology.
 
 ## API
 
