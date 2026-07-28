@@ -4,6 +4,8 @@ Python FastAPI backend service for activity ranking, summarization, and digest d
 
 ## Local Development Setup
 
+Requires Python 3.11 or 3.12 (not 3.13+) due to current dependency wheel availability.
+
 1. Navigate to the backend directory:
    ```bash
    cd backend
