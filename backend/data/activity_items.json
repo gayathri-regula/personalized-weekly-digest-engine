@@ -1,0 +1,1476 @@
+[
+  {
+    "id": "item_01",
+    "title": "Optimizing LLM Inference with PyTorch 2.4",
+    "content": "We explored recent PyTorch 2.4 compiler optimizations for transformer models. By leveraging custom Triton kernels and KV-cache quantization, latency was reduced by 42%.",
+    "category_tags": [
+      "AI",
+      "Machine Learning",
+      "Python"
+    ],
+    "created_at": "2026-07-20T11:17:00Z",
+    "engagement_metadata": {
+      "views": 2001,
+      "likes": 182,
+      "shares": 57,
+      "comments": 32
+    }
+  },
+  {
+    "id": "item_02",
+    "title": "Fine-Tuning Open-Weights Models for Code Generation",
+    "content": "A practical guide on fine-tuning Llama-3 8B using LoRA for specialized domain code syntax. We share evaluation benchmarks and memory footprint comparisons.",
+    "category_tags": [
+      "AI",
+      "Machine Learning",
+      "Open Source"
+    ],
+    "created_at": "2026-07-21T14:34:00Z",
+    "engagement_metadata": {
+      "views": 712,
+      "likes": 70,
+      "shares": 20,
+      "comments": 9
+    }
+  },
+  {
+    "id": "item_03",
+    "title": "Python 3.13 Free-Threading: Benchmarking GIL-Free Concurrency",
+    "content": "We benchmarked real-world CPU-bound workloads on Python 3.13 experimental free-threading build. Multi-core scaling showed impressive performance gains for numeric tasks.",
+    "category_tags": [
+      "Python",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-22T17:51:00Z",
+    "engagement_metadata": {
+      "views": 2078,
+      "likes": 412,
+      "shares": 51,
+      "comments": 102
+    }
+  },
+  {
+    "id": "item_04",
+    "title": "Building Real-Time RAG Systems with Vector Databases",
+    "content": "Architecting retrieval-augmented generation pipelines requires low-latency vector search. This article covers hybrid search strategies combining BM25 with dense embeddings.",
+    "category_tags": [
+      "AI",
+      "Data Science",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-23T20:08:00Z",
+    "engagement_metadata": {
+      "views": 114,
+      "likes": 13,
+      "shares": 3,
+      "comments": 2
+    }
+  },
+  {
+    "id": "item_05",
+    "title": "Automating Data Pipelines with Prefect and Python",
+    "content": "How our data team migrated legacy Cron jobs to modern Python workflows using Prefect 3.0. Dynamic task mapping simplified error handling and observability.",
+    "category_tags": [
+      "Python",
+      "Data Science",
+      "DevOps"
+    ],
+    "created_at": "2026-07-24T09:25:00Z",
+    "engagement_metadata": {
+      "views": 187,
+      "likes": 38,
+      "shares": 13,
+      "comments": 4
+    }
+  },
+  {
+    "id": "item_06",
+    "title": "Building Accessible Mobile Apps with React Native",
+    "content": "Ensuring inclusive design across iOS and Android apps requires proper screen reader semantics. We discuss accessibility audit tools and custom UI component patterns.",
+    "category_tags": [
+      "Mobile Development",
+      "UI/UX Design",
+      "JavaScript"
+    ],
+    "created_at": "2026-07-25T12:42:00Z",
+    "engagement_metadata": {
+      "views": 1241,
+      "likes": 112,
+      "shares": 11,
+      "comments": 12
+    }
+  },
+  {
+    "id": "item_07",
+    "title": "Securing Biometric Authentication on Android and iOS",
+    "content": "A deep dive into securely storing cryptographic keys in Hardware Security Modules (HSM) and KeyStore. We walk through biometrics authentication fallbacks and zero-trust patterns.",
+    "category_tags": [
+      "Mobile Development",
+      "Security"
+    ],
+    "created_at": "2026-07-26T15:59:00Z",
+    "engagement_metadata": {
+      "views": 3265,
+      "likes": 489,
+      "shares": 71,
+      "comments": 95
+    }
+  },
+  {
+    "id": "item_08",
+    "title": "Design Systems for Multi-Platform Mobile Applications",
+    "content": "Standardizing design tokens across Flutter and React Native enables consistent brand experiences. Learn how we unified colors, typography, and micro-interactions.",
+    "category_tags": [
+      "Mobile Development",
+      "UI/UX Design"
+    ],
+    "created_at": "2026-07-20T18:16:00Z",
+    "engagement_metadata": {
+      "views": 94,
+      "likes": 19,
+      "shares": 4,
+      "comments": 4
+    }
+  },
+  {
+    "id": "item_09",
+    "title": "Zero-Trust Security Architecture for Mobile APIs",
+    "content": "Mobile apps are inherently exposed to reverse engineering. Implementing strict mTLS, certificate pinning, and short-lived JWT tokens mitigates interception risk.",
+    "category_tags": [
+      "Security",
+      "Mobile Development",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-21T21:33:00Z",
+    "engagement_metadata": {
+      "views": 638,
+      "likes": 113,
+      "shares": 32,
+      "comments": 11
+    }
+  },
+  {
+    "id": "item_10",
+    "title": "Dark Mode UX: Principles for Reducing Eye Strain",
+    "content": "Designing effective dark mode goes beyond inverting background colors. We explore contrast ratios, elevation shadows, and OLED battery savings.",
+    "category_tags": [
+      "UI/UX Design"
+    ],
+    "created_at": "2026-07-22T10:50:00Z",
+    "engagement_metadata": {
+      "views": 1340,
+      "likes": 194,
+      "shares": 55,
+      "comments": 23
+    }
+  },
+  {
+    "id": "item_11",
+    "title": "Migrating API Gateways from NGINX to Envoy",
+    "content": "To support gRPC streaming and dynamic service discovery, our team transitioned to Envoy Gateway. We cover custom WASM filters and blue-green deployment strategies.",
+    "category_tags": [
+      "Cloud",
+      "DevOps",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-23T13:07:00Z",
+    "engagement_metadata": {
+      "views": 62,
+      "likes": 12,
+      "shares": 1,
+      "comments": 2
+    }
+  },
+  {
+    "id": "item_12",
+    "title": "Kubernetes Cost Optimization: Saving 35% on EKS",
+    "content": "Managing cloud compute costs requires granular pod autoscaling and spot instance orchestration. Here is how Karpenter reduced our monthly Kubernetes infrastructure bill.",
+    "category_tags": [
+      "Cloud",
+      "DevOps"
+    ],
+    "created_at": "2026-07-24T16:24:00Z",
+    "engagement_metadata": {
+      "views": 216,
+      "likes": 32,
+      "shares": 3,
+      "comments": 6
+    }
+  },
+  {
+    "id": "item_13",
+    "title": "Rust vs Go for Microservices: Production Benchmarks",
+    "content": "We evaluated memory efficiency and CPU throughput for high-throughput event consumers. Read about our findings comparing Rust and Go under heavy synthetic loads.",
+    "category_tags": [
+      "Backend Engineering",
+      "Open Source"
+    ],
+    "created_at": "2026-07-25T19:41:00Z",
+    "engagement_metadata": {
+      "views": 601,
+      "likes": 57,
+      "shares": 18,
+      "comments": 9
+    }
+  },
+  {
+    "id": "item_14",
+    "title": "Implementing Distributed Tracing with OpenTelemetry",
+    "content": "Debugging latency bottlenecks across microservices requires unified trace collection. Learn how to configure OpenTelemetry collector with Jaeger and Prometheus.",
+    "category_tags": [
+      "DevOps",
+      "Backend Engineering",
+      "Cloud"
+    ],
+    "created_at": "2026-07-26T08:58:00Z",
+    "engagement_metadata": {
+      "views": 100,
+      "likes": 11,
+      "shares": 3,
+      "comments": 1
+    }
+  },
+  {
+    "id": "item_15",
+    "title": "PostgreSQL Indexing Deep Dive: B-Tree, GIN, and BRIN",
+    "content": "Choosing the right index strategy dramatically speeds up database queries. We explain execution plans, index bloat maintenance, and partitioned tables.",
+    "category_tags": [
+      "Backend Engineering",
+      "DevOps"
+    ],
+    "created_at": "2026-07-20T11:15:00Z",
+    "engagement_metadata": {
+      "views": 802,
+      "likes": 95,
+      "shares": 15,
+      "comments": 17
+    }
+  },
+  {
+    "id": "item_16",
+    "title": "Vite 6 release Highlights: Faster HMR and Environment API",
+    "content": "Vite 6 introduces modular Environment API for custom server runtimes. We test bundling speed improvements and framework integration updates.",
+    "category_tags": [
+      "JavaScript",
+      "Open Source"
+    ],
+    "created_at": "2026-07-21T14:32:00Z",
+    "engagement_metadata": {
+      "views": 2481,
+      "likes": 508,
+      "shares": 177,
+      "comments": 43
+    }
+  },
+  {
+    "id": "item_17",
+    "title": "Building Micro-Frontends with Module Federation",
+    "content": "Decoupling large enterprise web applications allows autonomous team deployments. We outline architectural patterns and shared state management guidelines.",
+    "category_tags": [
+      "JavaScript",
+      "UI/UX Design",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-22T17:49:00Z",
+    "engagement_metadata": {
+      "views": 821,
+      "likes": 154,
+      "shares": 37,
+      "comments": 34
+    }
+  },
+  {
+    "id": "item_18",
+    "title": "Open Source Maintenance: Sustainable Contributor Ecosystems",
+    "content": "Maintainer burnout is a common challenge in popular open-source projects. We share best practices for automated triage, good-first-issue labels, and sponsorship models.",
+    "category_tags": [
+      "Open Source"
+    ],
+    "created_at": "2026-07-23T20:06:00Z",
+    "engagement_metadata": {
+      "views": 3360,
+      "likes": 295,
+      "shares": 57,
+      "comments": 39
+    }
+  },
+  {
+    "id": "item_19",
+    "title": "Designing Fluid Animations with CSS View Transitions",
+    "content": "The View Transitions API enables native-like page transitions in modern browsers. Discover how to create smooth layout morphs with minimal JavaScript.",
+    "category_tags": [
+      "UI/UX Design",
+      "JavaScript"
+    ],
+    "created_at": "2026-07-24T09:23:00Z",
+    "engagement_metadata": {
+      "views": 1935,
+      "likes": 168,
+      "shares": 42,
+      "comments": 39
+    }
+  },
+  {
+    "id": "item_20",
+    "title": "State Management in 2026: Signals vs React Hooks",
+    "content": "Fine-grained reactivity is changing frontend state architecture. We benchmark reactive signals against immutability and selector-based state trees.",
+    "category_tags": [
+      "JavaScript"
+    ],
+    "created_at": "2026-07-25T12:40:00Z",
+    "engagement_metadata": {
+      "views": 42,
+      "likes": 6,
+      "shares": 1,
+      "comments": 1
+    }
+  },
+  {
+    "id": "item_21",
+    "title": "Evaluating LLM Benchmarks: Beyond MMLU and GSM8K",
+    "content": "Standard LLM benchmarks often suffer from dataset contamination. We present custom evaluation suites for domain-specific reasoning and safety alignment.",
+    "category_tags": [
+      "AI",
+      "Data Science",
+      "Machine Learning"
+    ],
+    "created_at": "2026-07-26T15:57:00Z",
+    "engagement_metadata": {
+      "views": 1350,
+      "likes": 155,
+      "shares": 18,
+      "comments": 33
+    }
+  },
+  {
+    "id": "item_22",
+    "title": "Polars vs Pandas 2.0: High-Performance Dataframes",
+    "content": "Handling multi-gigabyte CSV and Parquet files in Python. Polars brings Rust-backed lazy evaluation and multi-threaded query execution.",
+    "category_tags": [
+      "Data Science",
+      "Python",
+      "Open Source"
+    ],
+    "created_at": "2026-07-20T18:14:00Z",
+    "engagement_metadata": {
+      "views": 57,
+      "likes": 8,
+      "shares": 1,
+      "comments": 1
+    }
+  },
+  {
+    "id": "item_23",
+    "title": "Feature Stores in MLOps: Standardizing Data Pipelines",
+    "content": "Feature stores bridge the gap between offline model training and online inference. We compare Feast and Hopsworks for real-time feature retrieval.",
+    "category_tags": [
+      "Data Science",
+      "Machine Learning",
+      "DevOps"
+    ],
+    "created_at": "2026-07-21T21:31:00Z",
+    "engagement_metadata": {
+      "views": 471,
+      "likes": 67,
+      "shares": 7,
+      "comments": 16
+    }
+  },
+  {
+    "id": "item_24",
+    "title": "Computer Vision at the Edge: Deploying YOLO on Embedded Devices",
+    "content": "Quantizing object detection models for low-power ARM devices. We walk through TensorRT export and ONNX runtime optimizations.",
+    "category_tags": [
+      "Machine Learning",
+      "AI",
+      "Mobile Development"
+    ],
+    "created_at": "2026-07-22T10:48:00Z",
+    "engagement_metadata": {
+      "views": 1171,
+      "likes": 111,
+      "shares": 19,
+      "comments": 17
+    }
+  },
+  {
+    "id": "item_25",
+    "title": "Generative AI for Synthetic Data Generation",
+    "content": "Using diffusion models and tabular LLMs to generate privacy-compliant training datasets for healthcare and financial analytics.",
+    "category_tags": [
+      "AI",
+      "Data Science"
+    ],
+    "created_at": "2026-07-23T13:05:00Z",
+    "engagement_metadata": {
+      "views": 3441,
+      "likes": 688,
+      "shares": 168,
+      "comments": 168
+    }
+  },
+  {
+    "id": "item_26",
+    "title": "Supply Chain Security: Signing Commits with Sigstore",
+    "content": "Software supply chain attacks continue to rise. Enforcing cryptographic commit signing and automated SBOM verification protects release pipelines.",
+    "category_tags": [
+      "Security",
+      "DevOps",
+      "Open Source"
+    ],
+    "created_at": "2026-07-24T16:22:00Z",
+    "engagement_metadata": {
+      "views": 1115,
+      "likes": 124,
+      "shares": 13,
+      "comments": 20
+    }
+  },
+  {
+    "id": "item_27",
+    "title": "API Vulnerability Assessment: OWASP Top 10 for 2026",
+    "content": "Analyzing broken object-level authorization, SSRF, and rate limiting weaknesses. Includes actionable remediation patterns for FastAPI and Express.",
+    "category_tags": [
+      "Security",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-25T19:39:00Z",
+    "engagement_metadata": {
+      "views": 2476,
+      "likes": 333,
+      "shares": 70,
+      "comments": 46
+    }
+  },
+  {
+    "id": "item_28",
+    "title": "Hardening Container Images for Production Deployments",
+    "content": "Distroless base images and non-root runtime users significantly reduce attack surface. Learn how to configure Trivy vulnerability scanners in GitHub Actions.",
+    "category_tags": [
+      "Security",
+      "DevOps",
+      "Cloud"
+    ],
+    "created_at": "2026-07-26T08:56:00Z",
+    "engagement_metadata": {
+      "views": 1163,
+      "likes": 149,
+      "shares": 44,
+      "comments": 23
+    }
+  },
+  {
+    "id": "item_29",
+    "title": "Open Source License Compliance in Enterprise Software",
+    "content": "Navigating AGPL, Apache 2.0, and MIT licenses in modern software development. Automated license checking in CI/CD pipelines.",
+    "category_tags": [
+      "Open Source",
+      "Security"
+    ],
+    "created_at": "2026-07-20T11:13:00Z",
+    "engagement_metadata": {
+      "views": 357,
+      "likes": 28,
+      "shares": 7,
+      "comments": 6
+    }
+  },
+  {
+    "id": "item_30",
+    "title": "Passkeys & WebAuthn: Eliminating Passwords in Web Apps",
+    "content": "Passkeys offer phishing-resistant authentication backed by public-key cryptography. We show how to implement WebAuthn support using native browser APIs.",
+    "category_tags": [
+      "Security",
+      "JavaScript",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-21T14:30:00Z",
+    "engagement_metadata": {
+      "views": 2109,
+      "likes": 314,
+      "shares": 89,
+      "comments": 40
+    }
+  },
+  {
+    "id": "item_31",
+    "title": "FastAPI 0.111 Features: Improved Pydantic V2 Integration",
+    "content": "FastAPI continues to polish response validation performance. Learn how new dependency injection features streamline middleware handling.",
+    "category_tags": [
+      "Python",
+      "Backend Engineering",
+      "Open Source"
+    ],
+    "created_at": "2026-07-22T17:47:00Z",
+    "engagement_metadata": {
+      "views": 459,
+      "likes": 82,
+      "shares": 15,
+      "comments": 7
+    }
+  },
+  {
+    "id": "item_32",
+    "title": "GraphQL vs REST: Choosing the Right API Paradigm",
+    "content": "Comparing over-fetching, caching strategies, and schema evolution across REST and GraphQL endpoints in microservices architectures.",
+    "category_tags": [
+      "Backend Engineering",
+      "JavaScript"
+    ],
+    "created_at": "2026-07-23T20:04:00Z",
+    "engagement_metadata": {
+      "views": 403,
+      "likes": 47,
+      "shares": 13,
+      "comments": 6
+    }
+  },
+  {
+    "id": "item_33",
+    "title": "Serverless Architectures: AWS Lambda vs Cloud Run",
+    "content": "Evaluating cold start latencies, autoscaling limits, and pricing models for containerized serverless deployments.",
+    "category_tags": [
+      "Cloud",
+      "DevOps"
+    ],
+    "created_at": "2026-07-24T09:21:00Z",
+    "engagement_metadata": {
+      "views": 2355,
+      "likes": 411,
+      "shares": 110,
+      "comments": 34
+    }
+  },
+  {
+    "id": "item_34",
+    "title": "Designing Responsive Layouts for Foldable Devices",
+    "content": "Foldable screen form factors present unique layout challenges. Using CSS media queries and window segment APIs to build responsive UIs.",
+    "category_tags": [
+      "UI/UX Design",
+      "Mobile Development"
+    ],
+    "created_at": "2026-07-25T12:38:00Z",
+    "engagement_metadata": {
+      "views": 1937,
+      "likes": 352,
+      "shares": 88,
+      "comments": 62
+    }
+  },
+  {
+    "id": "item_35",
+    "title": "Machine Learning Interpretability with SHAP and LIME",
+    "content": "Explaining complex black-box models to domain experts. We demonstrate feature attribution visualizers for tree-based models.",
+    "category_tags": [
+      "Machine Learning",
+      "Data Science"
+    ],
+    "created_at": "2026-07-26T15:55:00Z",
+    "engagement_metadata": {
+      "views": 245,
+      "likes": 37,
+      "shares": 12,
+      "comments": 7
+    }
+  },
+  {
+    "id": "item_36",
+    "title": "Automated Threat Modeling for Cloud-Native Applications",
+    "content": "Integrating threat modeling into early architecture planning. Mapping data flow diagrams to MITRE ATT&CK frameworks automatically.",
+    "category_tags": [
+      "Security",
+      "Cloud"
+    ],
+    "created_at": "2026-07-20T18:12:00Z",
+    "engagement_metadata": {
+      "views": 98,
+      "likes": 17,
+      "shares": 5,
+      "comments": 3
+    }
+  },
+  {
+    "id": "item_37",
+    "title": "SwiftUI vs Jetpack Compose: Modern Declarative UI",
+    "content": "Comparing state management, re-composition performance, and layout primitives in Apple and Google's flagship UI frameworks.",
+    "category_tags": [
+      "Mobile Development",
+      "UI/UX Design"
+    ],
+    "created_at": "2026-07-21T21:29:00Z",
+    "engagement_metadata": {
+      "views": 1872,
+      "likes": 178,
+      "shares": 29,
+      "comments": 23
+    }
+  },
+  {
+    "id": "item_38",
+    "title": "Building Event-Driven Systems with Apache Kafka",
+    "content": "Handling high-throughput message streaming with consumer groups, schema registries, and idempotent producers.",
+    "category_tags": [
+      "Backend Engineering",
+      "Cloud",
+      "Open Source"
+    ],
+    "created_at": "2026-07-22T10:46:00Z",
+    "engagement_metadata": {
+      "views": 429,
+      "likes": 71,
+      "shares": 22,
+      "comments": 7
+    }
+  },
+  {
+    "id": "item_39",
+    "title": "TypeScript 5.5 Features: Inferred Type Predicates",
+    "content": "TypeScript 5.5 introduces control flow narrowing for array filtering. Discover how this simplifies type safety in complex data pipelines.",
+    "category_tags": [
+      "JavaScript",
+      "Open Source"
+    ],
+    "created_at": "2026-07-23T13:03:00Z",
+    "engagement_metadata": {
+      "views": 2589,
+      "likes": 377,
+      "shares": 109,
+      "comments": 41
+    }
+  },
+  {
+    "id": "item_40",
+    "title": "Continuous Deployment Strategies: Canary vs Blue-Green",
+    "content": "Reducing deployment risk with automated rollback metrics and traffic splitting using ArgoCD and Flagger.",
+    "category_tags": [
+      "DevOps",
+      "Cloud"
+    ],
+    "created_at": "2026-07-24T16:20:00Z",
+    "engagement_metadata": {
+      "views": 1956,
+      "likes": 228,
+      "shares": 30,
+      "comments": 47
+    }
+  },
+  {
+    "id": "item_41",
+    "title": "Reinforcement Learning from Human Feedback (RLHF)",
+    "content": "Exploring reward model training and PPO alignment techniques used to make language models safer and more helpful.",
+    "category_tags": [
+      "AI",
+      "Machine Learning"
+    ],
+    "created_at": "2026-07-25T19:37:00Z",
+    "engagement_metadata": {
+      "views": 518,
+      "likes": 96,
+      "shares": 13,
+      "comments": 22
+    }
+  },
+  {
+    "id": "item_42",
+    "title": "Cross-Platform Mobile App Performance Profiling",
+    "content": "Identifying UI jank and memory leaks in Flutter and React Native using native profilers like Xcode Instruments and Android Studio Profiler.",
+    "category_tags": [
+      "Mobile Development",
+      "JavaScript"
+    ],
+    "created_at": "2026-07-26T08:54:00Z",
+    "engagement_metadata": {
+      "views": 450,
+      "likes": 86,
+      "shares": 17,
+      "comments": 15
+    }
+  },
+  {
+    "id": "item_43",
+    "title": "Zero-Downtime Database Migrations in Production",
+    "content": "Executing schema changes without locking active tables. Expand-contract migration patterns for PostgreSQL and MySQL.",
+    "category_tags": [
+      "Backend Engineering",
+      "DevOps"
+    ],
+    "created_at": "2026-07-20T11:11:00Z",
+    "engagement_metadata": {
+      "views": 47,
+      "likes": 4,
+      "shares": 1,
+      "comments": 0
+    }
+  },
+  {
+    "id": "item_44",
+    "title": "Designing Micro-Interactions for Web Applications",
+    "content": "Subtle UI feedback and hover animations elevate user engagement. We explore CSS keyframes and Framer Motion techniques.",
+    "category_tags": [
+      "UI/UX Design",
+      "JavaScript"
+    ],
+    "created_at": "2026-07-21T14:28:00Z",
+    "engagement_metadata": {
+      "views": 2787,
+      "likes": 445,
+      "shares": 73,
+      "comments": 51
+    }
+  },
+  {
+    "id": "item_45",
+    "title": "Securing Infrastructure as Code with Terraform Scanners",
+    "content": "Detecting misconfigured S3 buckets and overly permissive IAM roles prior to deployment using Checkov and tfsec.",
+    "category_tags": [
+      "Security",
+      "Cloud",
+      "DevOps"
+    ],
+    "created_at": "2026-07-22T17:45:00Z",
+    "engagement_metadata": {
+      "views": 2497,
+      "likes": 445,
+      "shares": 139,
+      "comments": 62
+    }
+  },
+  {
+    "id": "item_46",
+    "title": "Introduction to Quantum Computing Algorithms",
+    "content": "Understanding Qiskit and quantum gate primitives. How hybrid quantum-classical algorithms tackle optimization problems.",
+    "category_tags": [
+      "AI",
+      "Data Science",
+      "Python"
+    ],
+    "created_at": "2026-07-23T20:02:00Z",
+    "engagement_metadata": {
+      "views": 73,
+      "likes": 9,
+      "shares": 1,
+      "comments": 2
+    }
+  },
+  {
+    "id": "item_47",
+    "title": "Building Offline-First Web Applications with PWA",
+    "content": "Service workers, IndexedDB storage, and background sync strategies for robust web experiences during network outages.",
+    "category_tags": [
+      "JavaScript",
+      "Mobile Development"
+    ],
+    "created_at": "2026-07-24T09:19:00Z",
+    "engagement_metadata": {
+      "views": 83,
+      "likes": 12,
+      "shares": 3,
+      "comments": 1
+    }
+  },
+  {
+    "id": "item_48",
+    "title": "Infrastructure Monitoring: Prometheus vs Datadog",
+    "content": "Evaluating open-source observability stacks against fully managed SaaS solutions for Kubernetes metric collection.",
+    "category_tags": [
+      "DevOps",
+      "Cloud",
+      "Open Source"
+    ],
+    "created_at": "2026-07-25T12:36:00Z",
+    "engagement_metadata": {
+      "views": 861,
+      "likes": 120,
+      "shares": 40,
+      "comments": 16
+    }
+  },
+  {
+    "id": "item_49",
+    "title": "Building Real-Time Chat UIs with WebSockets and React",
+    "content": "Managing connection reconnections, optimistic UI updates, and message order guarantees in web applications.",
+    "category_tags": [
+      "JavaScript",
+      "UI/UX Design",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-26T15:53:00Z",
+    "engagement_metadata": {
+      "views": 513,
+      "likes": 98,
+      "shares": 31,
+      "comments": 11
+    }
+  },
+  {
+    "id": "item_50",
+    "title": "Adversarial Robustness in Deep Neural Networks",
+    "content": "Defending computer vision models against adversarial perturbations and evasion attacks using adversarial training.",
+    "category_tags": [
+      "Machine Learning",
+      "Security",
+      "AI"
+    ],
+    "created_at": "2026-07-20T18:10:00Z",
+    "engagement_metadata": {
+      "views": 145,
+      "likes": 19,
+      "shares": 6,
+      "comments": 3
+    }
+  },
+  {
+    "id": "item_51",
+    "title": "Clean Code Principles in Python Projects",
+    "content": "Applying SOLID design principles, type annotations, and automated linting (Ruff, Mypy) to maintain scalable Python codebases.",
+    "category_tags": [
+      "Python",
+      "Open Source"
+    ],
+    "created_at": "2026-07-21T21:27:00Z",
+    "engagement_metadata": {
+      "views": 684,
+      "likes": 149,
+      "shares": 39,
+      "comments": 16
+    }
+  },
+  {
+    "id": "item_52",
+    "title": "Cloud Security Posture Management (CSPM)",
+    "content": "Continuously monitoring cloud environments for compliance drift, unencrypted resources, and exposed ports across AWS and GCP.",
+    "category_tags": [
+      "Security",
+      "Cloud"
+    ],
+    "created_at": "2026-07-22T10:44:00Z",
+    "engagement_metadata": {
+      "views": 40,
+      "likes": 4,
+      "shares": 1,
+      "comments": 0
+    }
+  },
+  {
+    "id": "item_53",
+    "title": "Creating SVG Vector Animations for Web Interfaces",
+    "content": "Leveraging Lottie and CSS stroke animations to create lightweight visual assets for modern web landing pages.",
+    "category_tags": [
+      "UI/UX Design",
+      "JavaScript"
+    ],
+    "created_at": "2026-07-23T13:01:00Z",
+    "engagement_metadata": {
+      "views": 949,
+      "likes": 142,
+      "shares": 25,
+      "comments": 26
+    }
+  },
+  {
+    "id": "item_54",
+    "title": "Scaling Distributed Caching with Redis Cluster",
+    "content": "Partitioning cache keys, configuring cluster sentinel failover, and avoiding cache stampedes under high request concurrency.",
+    "category_tags": [
+      "Backend Engineering",
+      "Cloud"
+    ],
+    "created_at": "2026-07-24T16:18:00Z",
+    "engagement_metadata": {
+      "views": 1617,
+      "likes": 198,
+      "shares": 40,
+      "comments": 49
+    }
+  },
+  {
+    "id": "item_55",
+    "title": "MLOps Infrastructure: Kubeflow vs MLflow",
+    "content": "Comparing model tracking, artifact storage, and pipeline orchestration tools for production machine learning workflows.",
+    "category_tags": [
+      "Machine Learning",
+      "DevOps",
+      "Data Science"
+    ],
+    "created_at": "2026-07-25T19:35:00Z",
+    "engagement_metadata": {
+      "views": 1283,
+      "likes": 156,
+      "shares": 19,
+      "comments": 20
+    }
+  },
+  {
+    "id": "item_56",
+    "title": "iOS 18 Widget Kit Updates: Interactive Home Screen Widgets",
+    "content": "Building responsive, interactive home screen widgets using SwiftUI and Swift Concurrency in iOS 18.",
+    "category_tags": [
+      "Mobile Development",
+      "UI/UX Design"
+    ],
+    "created_at": "2026-07-26T08:52:00Z",
+    "engagement_metadata": {
+      "views": 242,
+      "likes": 51,
+      "shares": 13,
+      "comments": 8
+    }
+  },
+  {
+    "id": "item_57",
+    "title": "Ethical AI & Fairness in Machine Learning Models",
+    "content": "Identifying algorithmic bias in credit scoring and hiring algorithms. Implementing Fairlearn metrics and mitigation techniques.",
+    "category_tags": [
+      "AI",
+      "Data Science",
+      "Machine Learning"
+    ],
+    "created_at": "2026-07-20T11:09:00Z",
+    "engagement_metadata": {
+      "views": 2435,
+      "likes": 219,
+      "shares": 61,
+      "comments": 48
+    }
+  },
+  {
+    "id": "item_58",
+    "title": "Managing Secrets in Cloud Environments: Vault vs AWS Secrets Manager",
+    "content": "Centralizing secret rotation, dynamic credentials, and access control policies across microservices.",
+    "category_tags": [
+      "Security",
+      "DevOps",
+      "Cloud"
+    ],
+    "created_at": "2026-07-21T14:26:00Z",
+    "engagement_metadata": {
+      "views": 178,
+      "likes": 18,
+      "shares": 2,
+      "comments": 3
+    }
+  },
+  {
+    "id": "item_59",
+    "title": "Asynchronous Programming in Python: asyncio Deep Dive",
+    "content": "Mastering event loops, coroutines, and async generators. Avoiding common pitfalls like blocking operations inside coroutines.",
+    "category_tags": [
+      "Python",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-22T17:43:00Z",
+    "engagement_metadata": {
+      "views": 135,
+      "likes": 28,
+      "shares": 5,
+      "comments": 2
+    }
+  },
+  {
+    "id": "item_60",
+    "title": "Web Performance Optimization: Achieving 100 Lighthouse Score",
+    "content": "Optimizing Core Web Vitals (LCP, INP, CLS) through image compression, font subsetting, and critical CSS inline techniques.",
+    "category_tags": [
+      "JavaScript",
+      "UI/UX Design"
+    ],
+    "created_at": "2026-07-23T20:00:00Z",
+    "engagement_metadata": {
+      "views": 179,
+      "likes": 16,
+      "shares": 2,
+      "comments": 1
+    }
+  },
+  {
+    "id": "item_61",
+    "title": "DevSecOps: Shift-Left Security in Software Pipelines",
+    "content": "Embedding SAST, DAST, and secret scanning into GitHub pull request workflows without slowing down developer velocity.",
+    "category_tags": [
+      "Security",
+      "DevOps"
+    ],
+    "created_at": "2026-07-24T09:17:00Z",
+    "engagement_metadata": {
+      "views": 2963,
+      "likes": 580,
+      "shares": 90,
+      "comments": 74
+    }
+  },
+  {
+    "id": "item_62",
+    "title": "Building Cross-Platform Desktop Apps with Electron and Tauri",
+    "content": "Comparing memory footprint and bundle sizes between Chromium-based Electron and Rust-powered Tauri applications.",
+    "category_tags": [
+      "Open Source",
+      "JavaScript",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-25T12:34:00Z",
+    "engagement_metadata": {
+      "views": 560,
+      "likes": 96,
+      "shares": 24,
+      "comments": 16
+    }
+  },
+  {
+    "id": "item_63",
+    "title": "Retrieval-Augmented Generation for Enterprise Knowledge Bases",
+    "content": "Indexing internal Confluence and Notion documentation into vector databases for intelligent natural language search.",
+    "category_tags": [
+      "AI",
+      "Python",
+      "Data Science"
+    ],
+    "created_at": "2026-07-26T15:51:00Z",
+    "engagement_metadata": {
+      "views": 393,
+      "likes": 74,
+      "shares": 16,
+      "comments": 13
+    }
+  },
+  {
+    "id": "item_64",
+    "title": "Android Jetpack Architecture Components Best Practices",
+    "content": "Structuring robust Android apps using ViewModel, LiveData, Room DB, and Clean Architecture layer patterns.",
+    "category_tags": [
+      "Mobile Development",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-20T18:08:00Z",
+    "engagement_metadata": {
+      "views": 1824,
+      "likes": 217,
+      "shares": 40,
+      "comments": 50
+    }
+  },
+  {
+    "id": "item_65",
+    "title": "User Research Methods for B2B SaaS Products",
+    "content": "Conducting effective usability testing, contextual inquiries, and card sorting to validate complex feature workflows.",
+    "category_tags": [
+      "UI/UX Design"
+    ],
+    "created_at": "2026-07-21T21:25:00Z",
+    "engagement_metadata": {
+      "views": 1802,
+      "likes": 170,
+      "shares": 23,
+      "comments": 39
+    }
+  },
+  {
+    "id": "item_66",
+    "title": "Continuous Integration for Monorepos with Turborepo",
+    "content": "Caching build outputs and executing remote task graphs to speed up monorepo compilation times across multiple packages.",
+    "category_tags": [
+      "DevOps",
+      "JavaScript",
+      "Open Source"
+    ],
+    "created_at": "2026-07-22T10:42:00Z",
+    "engagement_metadata": {
+      "views": 1204,
+      "likes": 164,
+      "shares": 19,
+      "comments": 39
+    }
+  },
+  {
+    "id": "item_67",
+    "title": "Understanding OAuth 2.1 & OIDC Authentication Flows",
+    "content": "Implementing PKCE authorization code grant flows for Single Page Applications (SPA) and mobile applications securely.",
+    "category_tags": [
+      "Security",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-23T13:59:00Z",
+    "engagement_metadata": {
+      "views": 552,
+      "likes": 112,
+      "shares": 38,
+      "comments": 23
+    }
+  },
+  {
+    "id": "item_68",
+    "title": "Deploying Model APIs with FastAPI and Docker",
+    "content": "Containerizing machine learning models with gunicorn/uvicorn workers for production inference serving.",
+    "category_tags": [
+      "Python",
+      "Backend Engineering",
+      "Machine Learning"
+    ],
+    "created_at": "2026-07-24T16:16:00Z",
+    "engagement_metadata": {
+      "views": 270,
+      "likes": 38,
+      "shares": 8,
+      "comments": 4
+    }
+  },
+  {
+    "id": "item_69",
+    "title": "Responsive Typography Scale & Fluid Spacing Systems",
+    "content": "Using CSS `clamp()` and modular scale calculations to build harmonious typography across desktop and mobile viewports.",
+    "category_tags": [
+      "UI/UX Design"
+    ],
+    "created_at": "2026-07-25T19:33:00Z",
+    "engagement_metadata": {
+      "views": 2655,
+      "likes": 476,
+      "shares": 108,
+      "comments": 87
+    }
+  },
+  {
+    "id": "item_70",
+    "title": "Data Governance & Anonymization in Data Warehouses",
+    "content": "Implementing column-level encryption, differential privacy, and role-based access control in Snowflake and BigQuery.",
+    "category_tags": [
+      "Data Science",
+      "Security",
+      "Cloud"
+    ],
+    "created_at": "2026-07-26T08:50:00Z",
+    "engagement_metadata": {
+      "views": 67,
+      "likes": 10,
+      "shares": 2,
+      "comments": 1
+    }
+  },
+  {
+    "id": "item_71",
+    "title": "Building High-Performance CLI Tools in Python and Typer",
+    "content": "Designing intuitive command-line interfaces with rich terminal output, progress bars, and shell auto-completion.",
+    "category_tags": [
+      "Python",
+      "Open Source"
+    ],
+    "created_at": "2026-07-20T11:07:00Z",
+    "engagement_metadata": {
+      "views": 59,
+      "likes": 6,
+      "shares": 1,
+      "comments": 0
+    }
+  },
+  {
+    "id": "item_72",
+    "title": "Edge Computing with Cloudflare Workers and Vercel Edge",
+    "content": "Running latency-critical serverless functions at edge locations closer to end users. Handling global key-value storage.",
+    "category_tags": [
+      "Cloud",
+      "JavaScript",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-21T14:24:00Z",
+    "engagement_metadata": {
+      "views": 115,
+      "likes": 14,
+      "shares": 2,
+      "comments": 1
+    }
+  },
+  {
+    "id": "item_73",
+    "title": "Fine-Tuning Vision Transformers for Satellite Imagery",
+    "content": "Applying ViT architectures to land-use classification and environmental change monitoring from high-resolution satellite imagery.",
+    "category_tags": [
+      "Machine Learning",
+      "AI",
+      "Data Science"
+    ],
+    "created_at": "2026-07-22T17:41:00Z",
+    "engagement_metadata": {
+      "views": 249,
+      "likes": 22,
+      "shares": 5,
+      "comments": 5
+    }
+  },
+  {
+    "id": "item_74",
+    "title": "Building Inclusive UIs: Screen Readers and Color Contrast",
+    "content": "Fulfilling WCAG 2.2 AA standards through semantic HTML elements, ARIA attributes, and accessible color palettes.",
+    "category_tags": [
+      "UI/UX Design",
+      "JavaScript"
+    ],
+    "created_at": "2026-07-23T20:58:00Z",
+    "engagement_metadata": {
+      "views": 989,
+      "likes": 160,
+      "shares": 38,
+      "comments": 13
+    }
+  },
+  {
+    "id": "item_75",
+    "title": "Chaos Engineering with Gremlin and LitmusChaos",
+    "content": "Injecting latency, network partition faults, and pod failures into staging clusters to test system resiliency.",
+    "category_tags": [
+      "DevOps",
+      "Cloud"
+    ],
+    "created_at": "2026-07-24T09:15:00Z",
+    "engagement_metadata": {
+      "views": 885,
+      "likes": 96,
+      "shares": 14,
+      "comments": 10
+    }
+  },
+  {
+    "id": "item_76",
+    "title": "Building Custom VS Code Extensions with TypeScript",
+    "content": "Extending editor features with custom language servers, webviews, and automated code refactoring commands.",
+    "category_tags": [
+      "JavaScript",
+      "Open Source"
+    ],
+    "created_at": "2026-07-25T12:32:00Z",
+    "engagement_metadata": {
+      "views": 2175,
+      "likes": 223,
+      "shares": 73,
+      "comments": 47
+    }
+  },
+  {
+    "id": "item_77",
+    "title": "Securing GraphQL APIs against Query Complexity Attacks",
+    "content": "Preventing denial-of-service vulnerabilities by enforcing query depth limits, cost analysis, and field-level rate limiting.",
+    "category_tags": [
+      "Security",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-26T15:49:00Z",
+    "engagement_metadata": {
+      "views": 561,
+      "likes": 63,
+      "shares": 20,
+      "comments": 9
+    }
+  },
+  {
+    "id": "item_78",
+    "title": "Exploratory Data Analysis with Seaborn and Plotly",
+    "content": "Creating interactive visualizations and statistical charts to discover hidden correlation patterns in complex datasets.",
+    "category_tags": [
+      "Data Science",
+      "Python"
+    ],
+    "created_at": "2026-07-20T18:06:00Z",
+    "engagement_metadata": {
+      "views": 1905,
+      "likes": 155,
+      "shares": 35,
+      "comments": 15
+    }
+  },
+  {
+    "id": "item_79",
+    "title": "Flutter 3.22 Multi-Window Desktop Support",
+    "content": "Leveraging Flutter desktop capabilities to build multi-window desktop applications across Windows, macOS, and Linux.",
+    "category_tags": [
+      "Mobile Development",
+      "UI/UX Design",
+      "Open Source"
+    ],
+    "created_at": "2026-07-21T21:23:00Z",
+    "engagement_metadata": {
+      "views": 486,
+      "likes": 71,
+      "shares": 7,
+      "comments": 7
+    }
+  },
+  {
+    "id": "item_80",
+    "title": "Building Real-Time Analytics Dashboards with DuckDB",
+    "content": "Executing sub-second analytical queries on millions of records directly in Python and WebAssembly runtimes.",
+    "category_tags": [
+      "Data Science",
+      "Backend Engineering",
+      "Python"
+    ],
+    "created_at": "2026-07-22T10:40:00Z",
+    "engagement_metadata": {
+      "views": 612,
+      "likes": 123,
+      "shares": 30,
+      "comments": 27
+    }
+  },
+  {
+    "id": "item_81",
+    "title": "Zero-Knowledge Proofs: Practical Applications in Web3",
+    "content": "Understanding zk-SNARKs and zk-STARKs for privacy-preserving verifiable computation and identity verification.",
+    "category_tags": [
+      "Security",
+      "Open Source"
+    ],
+    "created_at": "2026-07-23T13:57:00Z",
+    "engagement_metadata": {
+      "views": 55,
+      "likes": 8,
+      "shares": 1,
+      "comments": 1
+    }
+  },
+  {
+    "id": "item_82",
+    "title": "Migrating Legacy Codebases to Modern TypeScript",
+    "content": "Incremental migration strategies, strict null check configurations, and automated codemods for enterprise codebases.",
+    "category_tags": [
+      "JavaScript",
+      "Backend Engineering"
+    ],
+    "created_at": "2026-07-24T16:14:00Z",
+    "engagement_metadata": {
+      "views": 439,
+      "likes": 56,
+      "shares": 15,
+      "comments": 6
+    }
+  },
+  {
+    "id": "item_83",
+    "title": "Optimizing SQL Query Execution Plans",
+    "content": "Analyzing `EXPLAIN ANALYZE` outputs, identifying sequential scans, and refactoring expensive JOIN queries.",
+    "category_tags": [
+      "Backend Engineering",
+      "Data Science"
+    ],
+    "created_at": "2026-07-25T19:31:00Z",
+    "engagement_metadata": {
+      "views": 3446,
+      "likes": 530,
+      "shares": 142,
+      "comments": 73
+    }
+  },
+  {
+    "id": "item_84",
+    "title": "Designing Voice User Interfaces (VUI) for Smart Assistants",
+    "content": "Crafting natural conversational flows, fallback intents, and voice prompt variations for hands-free interactions.",
+    "category_tags": [
+      "UI/UX Design",
+      "AI"
+    ],
+    "created_at": "2026-07-26T08:48:00Z",
+    "engagement_metadata": {
+      "views": 160,
+      "likes": 28,
+      "shares": 8,
+      "comments": 2
+    }
+  },
+  {
+    "id": "item_85",
+    "title": "Automating Security Scans in Pull Requests with Semgrep",
+    "content": "Writing custom static analysis rules to catch security anti-patterns specific to internal framework conventions.",
+    "category_tags": [
+      "Security",
+      "DevOps",
+      "Open Source"
+    ],
+    "created_at": "2026-07-20T11:05:00Z",
+    "engagement_metadata": {
+      "views": 41,
+      "likes": 7,
+      "shares": 1,
+      "comments": 0
+    }
+  },
+  {
+    "id": "item_86",
+    "title": "Fine-Tuning Whisper for Multilingual Speech Recognition",
+    "content": "Adapting OpenAI's Whisper model for domain-specific medical and legal transcriptions in low-resource languages.",
+    "category_tags": [
+      "AI",
+      "Machine Learning",
+      "Python"
+    ],
+    "created_at": "2026-07-21T14:22:00Z",
+    "engagement_metadata": {
+      "views": 581,
+      "likes": 67,
+      "shares": 16,
+      "comments": 15
+    }
+  },
+  {
+    "id": "item_87",
+    "title": "Building Serverless Data Lakehouse Architectures",
+    "content": "Combining Apache Iceberg, AWS Glue, and Athena for cost-effective, scalable analytics over S3 object storage.",
+    "category_tags": [
+      "Cloud",
+      "Data Science",
+      "DevOps"
+    ],
+    "created_at": "2026-07-22T17:39:00Z",
+    "engagement_metadata": {
+      "views": 311,
+      "likes": 54,
+      "shares": 8,
+      "comments": 4
+    }
+  },
+  {
+    "id": "item_88",
+    "title": "Unit Testing React Components with Vitest and Testing Library",
+    "content": "Writing maintainable component tests focused on user behavior rather than internal implementation details.",
+    "category_tags": [
+      "JavaScript",
+      "Open Source"
+    ],
+    "created_at": "2026-07-23T20:56:00Z",
+    "engagement_metadata": {
+      "views": 1807,
+      "likes": 188,
+      "shares": 56,
+      "comments": 39
+    }
+  },
+  {
+    "id": "item_89",
+    "title": "Prompt Engineering Techniques for Complex Reasoning",
+    "content": "Comparing Chain-of-Thought (CoT), Tree of Thoughts, and Few-Shot prompting patterns for structured LLM outputs.",
+    "category_tags": [
+      "AI",
+      "Python"
+    ],
+    "created_at": "2026-07-24T09:13:00Z",
+    "engagement_metadata": {
+      "views": 691,
+      "likes": 139,
+      "shares": 37,
+      "comments": 22
+    }
+  },
+  {
+    "id": "item_90",
+    "title": "Kubernetes Operator Development with Go and Operator SDK",
+    "content": "Automating custom database lifecycle operations (backup, restore, failover) using custom resource definitions (CRD).",
+    "category_tags": [
+      "DevOps",
+      "Backend Engineering",
+      "Cloud"
+    ],
+    "created_at": "2026-07-25T12:30:00Z",
+    "engagement_metadata": {
+      "views": 806,
+      "likes": 173,
+      "shares": 30,
+      "comments": 31
+    }
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "user_1",
+    "name": "Alice Chen",
+    "interest_tags": [
+      "AI",
+      "Machine Learning",
+      "Python"
+    ]
+  },
+  {
+    "id": "user_2",
+    "name": "Bob Smith",
+    "interest_tags": [
+      "Mobile Development",
+      "UI/UX Design",
+      "Security"
+    ]
+  },
+  {
+    "id": "user_3",
+    "name": "Charlie Davis",
+    "interest_tags": [
+      "Cloud",
+      "DevOps",
+      "Backend Engineering"
+    ]
+  },
+  {
+    "id": "user_4",
+    "name": "Diana Prince",
+    "interest_tags": [
+      "JavaScript",
+      "Open Source",
+      "UI/UX Design"
+    ]
+  },
+  {
+    "id": "user_5",
+    "name": "Ethan Hunt",
+    "interest_tags": [
+      "Security",
+      "Backend Engineering",
+      "Open Source"
+    ]
+  }
+]
