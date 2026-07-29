@@ -1,0 +1,49 @@
+name: Weekly Batch Digest Regeneration
+
+# ==============================================================================
+# SCHEDULED WORKFLOW CONFIGURATION
+# ==============================================================================
+# This GitHub Actions workflow automatically regenerates weekly digests for all
+# platform users on a recurring schedule (Mondays at 08:00 UTC), as well as
+# supporting manual on-demand execution via workflow_dispatch.
+#
+# NOTE FOR PHASE 11 (DEPLOYMENT):
+# The BACKEND_BASE_URL secret must be added to repository secrets under
+# Settings -> Secrets and variables -> Actions, set to the production Render URL
+# (e.g., https://personalized-weekly-digest-engine.onrender.com).
+# ==============================================================================
+
+on:
+  schedule:
+    # Run every Monday at 08:00 UTC (0 8 * * 1)
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+    # Enables manual trigger button in GitHub Actions tab
+
+jobs:
+  regenerate-digests:
+    name: Regenerate All User Digests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Python 3.11 Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'backend/requirements.txt'
+
+      - name: Install Backend Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Execute Weekly Batch Digest Regeneration Script
+        env:
+          # Production backend URL stored in GitHub Actions Secret
+          BACKEND_BASE_URL: ${{ secrets.BACKEND_BASE_URL }}
+        run: |
+          python backend/scripts/regenerate_all_digests.py
