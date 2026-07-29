@@ -7,3 +7,5 @@ python-dotenv==1.0.1
 pytest==8.2.2
 httpx==0.27.0
 anthropic==0.28.0
+# Test-only dependency for isolated in-memory test database
+aiosqlite==0.22.1
