@@ -20,10 +20,14 @@ def create_app() -> FastAPI:
         description="Backend API service for personalized activity ranking and digest generation.",
     )
 
-    # Configure CORS middleware for local frontend development
+    # Configure CORS middleware for local frontend development and production Vercel deployment
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "https://personalized-weekly-digest-engine-a.vercel.app",
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
