@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 from typing import Any, Dict, List
 import httpx
 
@@ -23,9 +24,37 @@ def main() -> None:
     print(f"Target Backend URL: {backend_url}")
     print(f"==========================================\n")
 
+    # Wake-up step for Render free-tier cold starts
+    max_wake_retries = 3
+    wake_up_success = False
+
+    print("[WAKE-UP] Pinging backend to handle Render free-tier cold start...")
+
+    for attempt in range(1, max_wake_retries + 1):
+        try:
+            with httpx.Client(timeout=90.0) as check_client:
+                health_res = check_client.get(f"{backend_url}/health")
+                if health_res.status_code == 200:
+                    print(f"[WAKE-UP] Backend responded successfully (HTTP 200) on attempt {attempt}.")
+                    wake_up_success = True
+                    break
+                else:
+                    print(f"[WAKE-UP] Attempt {attempt}/{max_wake_retries} returned HTTP {health_res.status_code}. Retrying...")
+        except Exception as wake_err:
+            print(f"[WAKE-UP] Attempt {attempt}/{max_wake_retries} failed ({wake_err}). Retrying...")
+
+        if attempt < max_wake_retries:
+            time.sleep(5.0)
+
+    if not wake_up_success:
+        print("[ERROR] Failed to wake up backend after 3 attempts. Exiting.")
+        sys.exit(1)
+
+    print("")
+
     # 1. Fetch user list from backend API
     try:
-        with httpx.Client(timeout=30.0) as client:
+        with httpx.Client(timeout=90.0) as client:
             print(f"[STEP 1] Fetching user list from {backend_url}/api/users...")
             users_res = client.get(f"{backend_url}/api/users")
             if users_res.status_code != 200:
@@ -56,7 +85,8 @@ def main() -> None:
                     if digest_res.status_code == 200:
                         digest_data = digest_res.json()
                         week_id = digest_data.get("week_identifier", "N/A")
-                        items_count = len(digest_data.get("items", []))
+                        highlights_list = digest_data.get("highlights", digest_data.get("items", []))
+                        items_count = len(highlights_list)
                         print(
                             f"  --> [SUCCESS] Digest compiled for week {week_id} with {items_count} items."
                         )
