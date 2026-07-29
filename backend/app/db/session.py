@@ -16,7 +16,14 @@ if not DATABASE_URL:
         "Please specify a valid async PostgreSQL connection string."
     )
 
-engine = create_async_engine(DATABASE_URL, echo=False, future=True)
+connect_args = {}
+if "asyncpg" in DATABASE_URL:
+    connect_args["statement_cache_size"] = 0
+    connect_args["prepared_statement_name_func"] = lambda *args, **kwargs: ""
+
+engine = create_async_engine(
+    DATABASE_URL, echo=False, future=True, connect_args=connect_args
+)
 
 async_session_factory = async_sessionmaker(
     bind=engine,

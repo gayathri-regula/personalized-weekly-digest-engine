@@ -2,6 +2,7 @@ import os
 from typing import Dict
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.routers.digest import router as digest_router
@@ -17,6 +18,15 @@ def create_app() -> FastAPI:
         title="Personalized Weekly Digest Engine API",
         version="0.1.0",
         description="Backend API service for personalized activity ranking and digest generation.",
+    )
+
+    # Configure CORS middleware for local frontend development
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     # Register API routers with /api prefix
