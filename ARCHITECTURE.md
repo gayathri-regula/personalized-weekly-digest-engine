@@ -392,6 +392,7 @@ To maintain focus on core task requirements and avoid scope creep, the following
 1. **Authentication & Authorization**: User login, password hashing, JWT tokens, and multi-tenant session management are NOT required or implemented. Users are selected via an explicit user selector for demonstration and testing purposes.
 2. **Interactive Feedback Loop Stretch Goal**: The optional stretch goal ("feedback link that adjusts future rankings") is deferred and explicitly excluded from the baseline implementation.
 3. **Unrequested Features**: Any feature or integration not directly traceable to the project specifications or requirement images is out of scope by default.
+4. **User Selector as Demo Convenience**: The UserSelector component displaying a dropdown of all users exists specifically to demonstrate personalization differences across multiple users for evaluation purposes, per the task's explicit grading criteria. In a real SFCollab integration, this would be replaced by the platform's existing logged-in user context - each user would see only their own digest automatically, with no user-switching UI required.
 
 ---
 

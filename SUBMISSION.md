@@ -23,6 +23,10 @@ The **Personalized Weekly Digest Engine** is a full-stack, AI-enhanced content a
 > **Render Free-Tier Cold Start Notice**:  
 > The backend web service is hosted on Render's free tier and automatically spins down after 15 minutes of inactivity. **The initial HTTP request after a period of inactivity (cold start) may take 30 to 50 seconds to respond** while the container environment initializes. Subsequent requests respond instantly (100–200ms).
 
+> [!NOTE]
+> **User Selector Evaluation Convenience**:  
+> The user selection dropdown menu in the frontend interface is built specifically as a testing convenience to evaluate personalization output across multiple team member profiles per the submission criteria. In a production SFCollab deployment, this dropdown would not exist; the component would bind directly to the authenticated user's session context to render their digest automatically.
+
 ---
 
 ## 3. Ranker Relevance Logic & "Why" Explanation Mechanism
