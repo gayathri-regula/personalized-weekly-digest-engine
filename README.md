@@ -1,153 +1,94 @@
 # Personalized Weekly Digest Engine
 
-A personalized content aggregation and weekly digest engine that ranks user activity items according to interest profiles, recency decay, and engagement signals. It generates structured executive summary prose using Claude 3.5 Sonnet (with a deterministic template fallback) and delivers periodic digest updates via a modern React web application.
+[![Submission Document](https://img.shields.io/badge/Submission-SUBMISSION.md-blue.svg)](file:///c:/AI_Engineer/personalized-weekly-digest-engine/SUBMISSION.md)
+[![Architecture Document](https://img.shields.io/badge/Architecture-ARCHITECTURE.md-green.svg)](file:///c:/AI_Engineer/personalized-weekly-digest-engine/ARCHITECTURE.md)
+[![Backend Tests](https://img.shields.io/badge/Pytest-30%20Passing-success.svg)](backend/tests)
+
+A personalized content aggregation and weekly digest engine that ranks user activity items according to interest profiles, recency decay, and engagement signals. It generates structured executive summary prose using Anthropic Claude 3.5 Sonnet (with a deterministic template fallback) and delivers periodic digest updates via a modern React web application.
 
 ---
 
-## 1. Setup & Run Instructions
+## 1. Project Overview
 
-### Prerequisites
-- **Backend**: Python 3.11 or 3.12 installed.
-- **Frontend**: Node.js 18+ and npm installed.
-
-### A. Environment Configuration
-Create a `.env` file in the `backend/` directory based on `.env.example`:
-```bash
-cd backend
-cp .env.example .env
-```
-Ensure required environment variables are set in `backend/.env`:
-- `DATABASE_URL`: Supabase PostgreSQL connection URI (`postgresql+asyncpg://...`)
-- `ANTHROPIC_API_KEY`: Anthropic API key for Claude 3.5 Sonnet summarization (optional; system falls back to template summarizer if empty)
-- `DEFAULT_SUMMARIZER_PROVIDER`: Default AI model identifier (`"claude-sonnet-4-6"`)
-- `SERVICE_NAME`: Service registration identifier (`"weekly-digest-api"`)
-
-> **Note**: Never expose real credentials or API keys in repository commits.
-
-### B. Backend Local Setup & Server Run
-```bash
-# Navigate to backend directory
-cd backend
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# (Optional) Seed/Initialize local or remote database
-python scripts/init_db.py
-python scripts/load_dataset.py
-
-# Launch FastAPI development server with uvicorn
-uvicorn app.main:app --reload --port 8000
-```
-Verify the server is running by opening `http://127.0.0.1:8000/health` in your browser or executing `curl http://127.0.0.1:8000/health`.
-
-### C. Frontend Local Setup & Run
-```bash
-# Navigate to frontend directory in a separate terminal
-cd frontend
-
-# Install Node modules
-npm install
-
-# Start Vite development server
-npm run dev
-```
-Open your browser at `http://localhost:5173` to interact with the application.
-
-### D. Running the Test Suite
-Run all unit and integration tests (30 passing tests) across ranker, summarizer, service, and API layers:
-```bash
-python -m pytest backend/tests -v
-```
+The **Personalized Weekly Digest Engine** is an end-to-end AI-powered content delivery platform that solves developer information overload by aggregating weekly activity items and generating personalized executive digests. The platform is built across four core architectural pillars per the task specification:
+1. **AI & Recommendation Engine**: Features a deterministic scoring ranker (60% tag match, 25% recency decay, 15% engagement) coupled with Anthropic Claude 3.5 Sonnet for executive summary prose composition (with a fallback to a template engine when unconfigured or offline).
+2. **Backend API**: A high-performance Python 3.11 service built with FastAPI, SQLAlchemy 2.0 Async ORM, Pydantic v2, and PostgreSQL (Supabase) / SQLite database persistence.
+3. **Frontend Web App**: A responsive, dark-mode glassmorphic dashboard built with React 18, Vite, TypeScript, and Vanilla CSS enabling multi-user profile switching and interactive digest generation.
+4. **Deployment & Automation**: Live API hosted on Render free-tier, frontend deployed on Vercel, and automated recurring weekly batch digest regeneration executed via GitHub Actions (`.github/workflows/weekly_digest.yml`).
 
 ---
 
-## 2. System Architecture
-
-The project is structured with a strict separation of concerns between recommendation scoring, AI summarization, data persistence, and UI presentation:
-
-- **Ranker vs. Summarizer Separation**: The rule-based deterministic ranker (`backend/app/services/ranker.py`) scores, filters, and ranks activity items first. The AI summarizer module (`backend/app/services/summarizer.py`) then receives the top-ranked items to compose structured executive prose.
-- **Backend Stack**: Built with **Python 3.11**, **FastAPI** for REST API endpoints, **SQLAlchemy 2.0** (AsyncSession), **Pydantic v2** & `pydantic-settings` for configuration management, and **Uvicorn** as the ASGI server.
-- **Frontend Stack**: Built with **React 18**, **Vite**, **TypeScript**, and **Vanilla CSS** with glassmorphism and modern dark-mode aesthetic styling.
-- **Database Layer**: **Supabase PostgreSQL** accessed via `asyncpg` in production, with an in-memory SQLite database (`aiosqlite`) for fast, isolated automated testing.
-- **Hosting & Infrastructure**:
-  - **Backend**: Hosted on **Render** as a Python Web Service.
-  - **Frontend**: Deployed on **Vercel** static site hosting.
-
----
-
-## 3. Live Deployment Links
+## 2. Live Deployment URLs
 
 - **Frontend App**: [https://personalized-weekly-digest-engine-a.vercel.app](https://personalized-weekly-digest-engine-a.vercel.app)
-- **Backend API**: [https://personalized-weekly-digest-engine-1.onrender.com](https://personalized-weekly-digest-engine-1.onrender.com)
-- **Interactive Swagger Documentation**: [https://personalized-weekly-digest-engine-1.onrender.com/docs](https://personalized-weekly-digest-engine-1.onrender.com/docs)
+- **Backend API**: [https://personalized-weekly-digest-engine.onrender.com](https://personalized-weekly-digest-engine.onrender.com)
+- **Interactive Swagger Documentation**: [https://personalized-weekly-digest-engine.onrender.com/docs](https://personalized-weekly-digest-engine.onrender.com/docs)
 
-> **Important Note**: The backend web service is hosted on Render's free tier, which spins down after 15 minutes of inactivity. The initial request after an idle period (cold start) may take **50+ seconds** to respond while the container spins up.
+> [!IMPORTANT]
+> **Render Free-Tier Cold Start Delay**:  
+> The backend web service is hosted on Render's free tier, which spins down after 15 minutes of inactivity. **The initial request after a period of inactivity (cold start) may take 30 to 50 seconds to respond** while the container spins up. Subsequent requests respond in ~100ms.
 
 ---
 
-## 4. Ranker Relevance Logic
-
-The deterministic activity recommendation engine is implemented in [`backend/app/services/ranker.py`](backend/app/services/ranker.py) (specifically within functions `rank_items_for_user`, `compute_tag_match_score`, `compute_recency_decay`, and `compute_engagement_score`).
+## 3. How the Ranker Decides Relevance ("Why" Note Mechanics)
 
 ### Scoring Formula
-Each activity item is assigned a composite `relevance_score` between `0.0` and `1.0` calculated as a weighted sum of three independent signals:
+The ranker ([`backend/app/services/ranker.py`](backend/app/services/ranker.py)) assigns each activity item a composite `relevance_score` between `0.0` and `1.0`:
 
 $$\text{relevance\_score} = 0.60 \times \text{tag\_score} + 0.25 \times \text{recency\_score} + 0.15 \times \text{engagement\_score}$$
 
-1. **Interest-Tag Match Score ($60\%$ weight)**:
-   - **Code Reference**: `compute_tag_match_score()` in [`ranker.py`](backend/app/services/ranker.py#L44-L67).
-   - **Formula**: $\frac{|\text{UserInterests} \cap \text{ItemCategoryTags}|}{\max(1, |\text{UserInterests}|)}$
-   - Measures the proportion of the user's explicit interest tags present on the item.
-2. **Recency Decay Score ($25\%$ weight)**:
-   - **Code Reference**: `compute_recency_decay()` in [`ranker.py`](backend/app/services/ranker.py#L69-L96).
-   - **Formula**: $e^{-\lambda \cdot t_{\text{days}}}$ where $\lambda = 0.20$.
-   - An exponential decay where an item 7 days old retains $\approx 24.7\%$ of its recency value.
-3. **Engagement Score ($15\%$ weight)**:
-   - **Code Reference**: `compute_engagement_score()` in [`ranker.py`](backend/app/services/ranker.py#L99-L121).
-   - **Formula**: $\min\left(1.0, \frac{\text{likes} \times 2.0 + \text{views} \times 0.1 + \text{shares} \times 5.0}{100.0}\right)$
-   - Normalizes raw user interaction metrics to a $[0.0, 1.0]$ scale.
+1. **Tag Match Score (60% Weight)**: Ratio of matching user interest tags to total user tags ($\frac{|\text{UserInterests} \cap \text{ItemCategoryTags}|}{\max(1, |\text{UserInterests}|)}$).
+2. **Recency Decay Score (25% Weight)**: Exponential decay $e^{-0.20 \times t_{\text{days}}}$ over elapsed days.
+3. **Engagement Score (15% Weight)**: Normalized interaction score based on likes ($\times 2.0$), views ($\times 0.1$), and shares ($\times 5.0$).
 
-### Threshold & Sorting
-- Items with a final `relevance_score` strictly below `0.10` (`MIN_RELEVANCE_THRESHOLD`) are excluded.
-- The remaining items are sorted descending by `relevance_score` (with creation timestamp and item ID as tie-breakers) and capped to the top $N$ items (default: 5).
+### Explanation Generation & Fallback Rules
+- **Direct Matching**: The `"because you follow X"` explanation is derived directly from the exact mathematical intersection of user interests and item tags ($\text{UserInterests} \cap \text{ItemCategoryTags}$) — it is not a separate invented sentence.
+- **Minimum Relevance Threshold**: Items scoring below `0.10` are automatically excluded.
+- **Zero-Overlap Fallback**: If an item has zero tag overlap with the user but qualifies based on high recency and engagement, it receives the fallback explanation: `"popular activity item in your network this week"`.
 
 ---
 
-## 5. "Why" Explanation Mechanism
+## 4. Multi-User Digest Validation Evidence
 
-The human-readable explanation line associated with each highlight item (`explanation_text`) is computed in `derive_explanation()` in [`backend/app/services/ranker.py`](backend/app/services/ranker.py#L123-L137).
+The engine delivers distinct, non-overlapping top activity items and personalized explanations across different user profiles based on live production API calculations:
 
-### Personalization & Truthfulness
-- **Intersection Logic**: `explanation_text` is constructed by computing the **exact mathematical intersection** between the item's `category_tags` and the target user's `interest_tags`:
-  $$\text{MatchingTags} = \text{UserInterests} \cap \text{ItemCategoryTags}$$
-- If matching tags exist, the explanation formats them into a statement: `"because you follow TagA, TagB"`.
-- **Truthful vs. Decorative**: The system does **not** simply print all of an item's tags. For instance, if an activity item has tags `["AI", "Machine Learning", "Python"]`:
-  - **User 1** (following `AI`, `Machine Learning`, `Python`) receives: `"because you follow AI, Machine Learning, Python"`.
-  - **User A** (following `AI`, `Cloud`) receives: `"because you follow AI"`.
-  - **User B** (following `Python`, `Backend Engineering`) receives: `"because you follow Python"`.
-- This guarantees that two users viewing the exact same activity item will see different, truthful explanations matching their personal profile.
-- **Fallback**: If an item qualifies based on high recency and engagement despite zero tag overlap, it displays `"popular activity item in your network this week"`.
-
----
-
-## 6. GitHub Actions Automated Scheduler
-
-Periodic weekly digest generation is automated via a GitHub Actions workflow:
-
-- **Workflow Path**: [`.github/workflows/weekly_digest.yml`](.github/workflows/weekly_digest.yml)
-- **Schedule (Cron)**: Executed automatically every Monday at 09:00 UTC (`cron: '0 9 * * 1'`), with support for manual triggers via `workflow_dispatch`.
-- **Execution Workflow**: Runs `backend/scripts/regenerate_all_digests.py`, which executes an automated 90-second wake-up ping against `GET /health` to wake Render from free-tier sleep before sequentially invoking `POST /api/digest/{user_id}` for all registered users.
-- **Verification Evidence**: Complete run history, timing, and step execution logs can be reviewed under the repository's **Actions** tab on GitHub.
-
----
-
-## 7. Multi-User Validation Evidence
-
-The personalization engine has been validated against three distinct seed users, confirming 100% non-overlapping, domain-specific digest outputs:
-
-| User ID | User Name | Interest Tags | Primary Digest Topic Cluster | Top Ranked Highlight Item |
+| User Profile | User Interests | Top Ranked Highlight Item | Relevance Score | Explanation Text |
 |---|---|---|---|---|
-| `user_1` | **Alice Chen** | `AI`, `Machine Learning`, `Python` | **AI/ML & LLM Optimization** | *Fine-Tuning Whisper for Multilingual Speech Recognition* (Score: `0.8349`) |
-| `user_2` | **Bob Smith** | `Mobile Development`, `UI/UX Design`, `Security` | **Mobile Security & Interactive UIs** | *Securing Biometric Authentication on Android and iOS* (Score: `0.7838`) |
-| `user_3` | **Charlie Davis** | `Cloud`, `DevOps`, `Backend Engineering` | **Cloud Infrastructure & Kubernetes** | *Kubernetes Operator Development with Go and Operator SDK* (Score: `0.9360`) |
+| **Alice Chen** (`user_1`) | `AI`, `Machine Learning`, `Python` | *Fine-Tuning Whisper for Multilingual Speech Recognition* | `0.8349` | `"because you follow AI, Machine Learning, Python"` |
+| **Charlie Davis** (`user_3`) | `Cloud`, `DevOps`, `Backend Engineering` | *Kubernetes Operator Development with Go and Operator SDK* | `0.936` | `"because you follow Backend Engineering, Cloud, DevOps"` |
+| **Diana Prince** (`user_4`) | `JavaScript`, `Open Source`, `UI/UX Design` | *Building Real-Time Chat UIs with WebSockets and React* | `0.7837` | `"because you follow JavaScript, UI/UX Design"` |
+
+> **Why They Differ**: Alice, Charlie, and Diana have interest profiles with zero tag overlap by design. As a result, the tag intersection formula evaluates completely disjoint matching sets, surfacing tailored, domain-specific activity items for each user.
+
+---
+
+## 5. Scheduled Automation Job Evidence
+
+Periodic digest generation is automated via GitHub Actions:
+- **Workflow File**: [`.github/workflows/weekly_digest.yml`](.github/workflows/weekly_digest.yml)
+- **Schedule**: Recurring cron trigger every Monday at 08:00 UTC (`0 8 * * 1`).
+- **Manual Trigger**: Supports on-demand execution via `workflow_dispatch`.
+- **Infrastructure Verification**: Verified running successfully on GitHub's infrastructure. The workflow uses `backend/scripts/regenerate_all_digests.py`, issuing a cold-start wake-up ping to Render before regenerating weekly digests for all platform users.
+
+---
+
+## 6. Architecture Summary
+
+A detailed breakdown of system components, sequence diagrams, LLM fallback strategy, and database schema is available in [ARCHITECTURE.md](file:///c:/AI_Engineer/personalized-weekly-digest-engine/ARCHITECTURE.md).
+
+---
+
+## 7. Local Setup Instructions
+
+Pointers to detailed setup guides:
+- **Backend Setup**: See [`backend/README.md`](file:///c:/AI_Engineer/personalized-weekly-digest-engine/backend/README.md) (`pip install -r requirements.txt`, `python scripts/init_db.py`, `uvicorn app.main:app --reload`).
+- **Frontend Setup**: See [`frontend/README.md`](file:///c:/AI_Engineer/personalized-weekly-digest-engine/frontend/README.md) (`npm install`, `npm run dev`).
+- **Automated Tests**: Run `python -m pytest backend/tests -v` to execute all 30 unit & integration tests.
+
+---
+
+## 8. Known Limitations
+
+- **Render Free-Tier Cold Start**: Cold start requests take 30–50 seconds when the server has been idle for over 15 minutes.
+- **No User Authentication**: User switching is unauthenticated in the UI to simplify grading and evaluation.
+- **Feedback-Link Stretch Goal**: Direct feedback links (like/dislike feedback per item) were an optional stretch goal and are not included in this release.
