@@ -1,6 +1,6 @@
 """FastAPI router for weekly digest generation and retrieval endpoints."""
 
-from datetime import timezone
+from datetime import datetime, timezone
 from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import delete, select
@@ -42,8 +42,9 @@ async def generate_user_digest(
 
     ref_now = get_reference_now()
     week_id = get_week_identifier(ref_now)
+    actual_generation_time = datetime.now(timezone.utc)
 
-    # 3. Score and rank items
+    # 3. Score and rank items using dataset reference time (ref_now)
     ranked_items = rank_items_for_user(
         user=user, items=items, top_n=5, now=ref_now
     )
@@ -71,7 +72,7 @@ async def generate_user_digest(
         use_llm=True,
     )
 
-    # 6. Upsert Digest record per (user_id, week_identifier)
+    # 6. Upsert Digest record per (user_id, week_identifier) with real generation time
     digest_stmt = select(Digest).where(
         Digest.user_id == user_id, Digest.week_identifier == week_id
     )
@@ -80,7 +81,7 @@ async def generate_user_digest(
 
     if existing_digest is not None:
         digest_obj = existing_digest
-        digest_obj.generated_at = ref_now
+        digest_obj.generated_at = actual_generation_time
         digest_obj.summary_prose = summary_prose
         # Delete existing DigestItem rows for upsert replacement
         await db.execute(
@@ -92,7 +93,7 @@ async def generate_user_digest(
             id=digest_id,
             user_id=user_id,
             week_identifier=week_id,
-            generated_at=ref_now,
+            generated_at=actual_generation_time,
             summary_prose=summary_prose,
         )
         db.add(digest_obj)

@@ -34,6 +34,9 @@ async def test_get_users_endpoint(async_client: AsyncClient):
 @pytest.mark.anyio
 async def test_post_digest_valid_user(async_client: AsyncClient):
     """Test that POST /api/digest/user_1 generates and returns a valid digest."""
+    from datetime import datetime, timezone
+    now_utc = datetime.now(timezone.utc)
+
     response = await async_client.post("/api/digest/user_1")
     assert response.status_code == 200
     data = response.json()
@@ -42,6 +45,10 @@ async def test_post_digest_valid_user(async_client: AsyncClient):
     assert data["week_identifier"] == "2026-W30"
     assert "summary_prose" in data
     assert len(data["items"]) > 0
+
+    # Verify generated_at is a recent real-time timestamp (within 60s of now)
+    gen_at = datetime.fromisoformat(data["generated_at"].replace("Z", "+00:00"))
+    assert abs((now_utc - gen_at).total_seconds()) < 60
 
     first_item = data["items"][0]
     assert "activity_item_id" in first_item
