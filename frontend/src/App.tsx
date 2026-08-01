@@ -52,7 +52,7 @@ export const App: React.FC = () => {
       <SideDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        selectedUserId={selectedUser?.id || null}
+        selectedUser={selectedUser}
         onUserSelect={handleUserSelect}
         onUserCreated={handleUserCreated}
         refreshKey={userRefreshKey}

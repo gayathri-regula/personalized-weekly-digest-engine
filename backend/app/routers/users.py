@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.constants import INTEREST_TAXONOMY
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, UsersListResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdateInterest, UsersListResponse
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -81,4 +81,46 @@ async def create_user(
         id=new_user.id,
         name=new_user.name,
         interest_tags=new_user.interest_tags,
+    )
+
+
+@router.patch("/{user_id}", response_model=UserResponse)
+async def update_user_interests(
+    user_id: str,
+    update_in: UserUpdateInterest,
+    db: AsyncSession = Depends(get_db),
+) -> UserResponse:
+    """Update an existing user's interest tags."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User '{user_id}' not found.",
+        )
+
+    # Validate duplicate tags
+    if len(update_in.interest_tags) != len(set(update_in.interest_tags)):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Duplicate interest tags are not allowed.",
+        )
+
+    # Validate all tags against INTEREST_TAXONOMY
+    for tag in update_in.interest_tags:
+        if tag not in INTEREST_TAXONOMY:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid interest tag '{tag}'. Tag must be one of the supported taxonomy interests.",
+            )
+
+    # Update ONLY interest_tags column
+    user.interest_tags = update_in.interest_tags
+    await db.commit()
+    await db.refresh(user)
+
+    return UserResponse(
+        id=user.id,
+        name=user.name,
+        interest_tags=user.interest_tags,
     )

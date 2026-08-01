@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
 import { CreateUserForm } from "./CreateUserForm";
+import { EditInterestsForm } from "./EditInterestsForm";
 import { UserSelector } from "./UserSelector";
 import { User } from "../types";
 
 interface SideDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedUserId: string | null;
+  selectedUser: User | null;
   onUserSelect: (user: User) => void;
   onUserCreated: (newUser: User) => void;
   refreshKey: number;
@@ -15,7 +16,7 @@ interface SideDrawerProps {
 export const SideDrawer: React.FC<SideDrawerProps> = ({
   isOpen,
   onClose,
-  selectedUserId,
+  selectedUser,
   onUserSelect,
   onUserCreated,
   refreshKey,
@@ -39,6 +40,11 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
 
   const handleCreateUser = (newUser: User) => {
     onUserCreated(newUser);
+    onClose();
+  };
+
+  const handleInterestsUpdated = (updatedUser: User) => {
+    onUserSelect(updatedUser);
     onClose();
   };
 
@@ -71,15 +77,28 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
           {/* Section 1: User Profile Selection */}
           <section className="drawer-section">
             <UserSelector
-              selectedUserId={selectedUserId}
+              selectedUserId={selectedUser?.id || null}
               onUserSelect={handleSelectUser}
               refreshKey={refreshKey}
             />
           </section>
 
+          {/* Section 2: Edit Existing User Interests (only when user is selected) */}
+          {selectedUser && (
+            <>
+              <hr className="drawer-divider" />
+              <section className="drawer-section">
+                <EditInterestsForm
+                  user={selectedUser}
+                  onUpdated={handleInterestsUpdated}
+                />
+              </section>
+            </>
+          )}
+
           <hr className="drawer-divider" />
 
-          {/* Section 2: New User Onboarding Form */}
+          {/* Section 3: New User Onboarding Form */}
           <section className="drawer-section">
             <CreateUserForm onUserCreated={handleCreateUser} />
           </section>

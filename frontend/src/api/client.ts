@@ -108,6 +108,45 @@ export async function createUser(
 }
 
 /**
+ * Update interest tags for an existing user profile.
+ */
+export async function updateUserInterests(
+  userId: string,
+  interestTags: string[]
+): Promise<User> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        interest_tags: interestTags,
+      }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(
+        `Failed to update interest topics: ${detail}`,
+        response.status
+      );
+    }
+    const updatedUser: User = await response.json();
+    return updatedUser;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Backend server unreachable during profile update. Please try again.",
+      0
+    );
+  }
+}
+
+/**
  * Fetch the latest weekly digest for a given user.
  * Returns null if status is 404 (digest not yet generated for user).
  */

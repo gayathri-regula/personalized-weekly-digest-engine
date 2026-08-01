@@ -41,6 +41,17 @@ class UserCreate(BaseModel):
     )
 
 
+class UserUpdateInterest(BaseModel):
+    """Schema for updating a user's interest tags."""
+
+    interest_tags: List[str] = Field(
+        ...,
+        min_length=2,
+        max_length=4,
+        description="Updated list of 2 to 4 interest tags from taxonomy",
+    )
+
+
 class InterestsResponse(BaseModel):
     """Schema for returning domain interest taxonomy."""
 

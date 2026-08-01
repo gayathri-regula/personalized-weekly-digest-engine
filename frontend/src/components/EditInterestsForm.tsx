@@ -1,23 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { createUser, generateDigest, getInterests } from "../api/client";
+import { generateDigest, getInterests, updateUserInterests } from "../api/client";
 import { InterestMultiSelect } from "./InterestMultiSelect";
 import { User } from "../types";
 
-interface CreateUserFormProps {
-  onUserCreated: (newUser: User) => void;
+interface EditInterestsFormProps {
+  user: User;
+  onUpdated: (updatedUser: User) => void;
 }
 
-export const CreateUserForm: React.FC<CreateUserFormProps> = ({
-  onUserCreated,
+export const EditInterestsForm: React.FC<EditInterestsFormProps> = ({
+  user,
+  onUpdated,
 }) => {
-  const [name, setName] = useState<string>("");
   const [availableInterests, setAvailableInterests] = useState<string[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    user.interest_tags || []
+  );
   const [loadingInterests, setLoadingInterests] = useState<boolean>(true);
-  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [createdUser, setCreatedUser] = useState<User | null>(null);
+  const [updatedUser, setUpdatedUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedTags(user.interest_tags || []);
+    setUpdatedUser(null);
+    setError(null);
+  }, [user]);
 
   useEffect(() => {
     let isMounted = true;
@@ -49,53 +58,52 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
     };
   }, []);
 
-  const isNameValid = name.trim().length >= 1 && name.trim().length <= 100;
+  const initialSorted = [...(user.interest_tags || [])].sort().join(",");
+  const currentSorted = [...selectedTags].sort().join(",");
+  const isChanged = initialSorted !== currentSorted;
+
   const isTagsValid = selectedTags.length >= 2 && selectedTags.length <= 4;
-  const canSubmit = isNameValid && isTagsValid && !isCreating;
+  const canSave = isChanged && isTagsValid && !isSaving;
 
-  // Step 1: Create user profile ONLY
-  const handleCreateProfile = async (e: React.FormEvent) => {
+  // Step 1: Save interest changes ONLY
+  const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSave) return;
 
-    setIsCreating(true);
+    setIsSaving(true);
     setError(null);
 
     try {
-      const newUser = await createUser(name.trim(), selectedTags);
-      setCreatedUser(newUser);
+      const savedUser = await updateUserInterests(user.id, selectedTags);
+      setUpdatedUser(savedUser);
     } catch (err: unknown) {
       const msg =
         err instanceof Error
           ? err.message
-          : "An unexpected error occurred during user creation.";
+          : "Failed to update profile interests.";
       setError(msg);
     } finally {
-      setIsCreating(false);
+      setIsSaving(false);
     }
   };
 
-  // Step 2: Generate digest for newly created user
-  const handleGenerateDigest = async () => {
-    if (!createdUser) return;
+  // Step 2: Regenerate digest for user
+  const handleRegenerateDigest = async () => {
+    if (!updatedUser) return;
 
     setIsGenerating(true);
     setError(null);
 
     try {
-      await generateDigest(createdUser.id);
-      const userToSelect = createdUser;
-      // Reset form state
-      setCreatedUser(null);
-      setName("");
-      setSelectedTags([]);
-      // Parent callback to select user and close drawer
-      onUserCreated(userToSelect);
+      await generateDigest(updatedUser.id);
+      const userToSelect = updatedUser;
+      setUpdatedUser(null);
+      onUpdated(userToSelect);
     } catch (err: unknown) {
       const msg =
         err instanceof Error
           ? err.message
-          : "Failed to generate digest for new user.";
+          : "Failed to regenerate digest.";
       setError(msg);
     } finally {
       setIsGenerating(false);
@@ -103,13 +111,14 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
   };
 
   return (
-    <div className="create-user-card">
-      <div className="create-user-header">
-        <span className="create-user-badge">✨ Onboarding</span>
-        <h3 className="create-user-title">New here? Create your profile</h3>
-        <p className="create-user-subtitle">
-          Select 2 to 4 interest topics to receive a personalized weekly digest
-          ranking.
+    <div className="edit-interests-card">
+      <div className="edit-interests-header">
+        <span className="edit-interests-badge">⚙️ Preferences</span>
+        <h3 className="edit-interests-title">
+          Edit Interests for {user.name.split(" ")[0]}
+        </h3>
+        <p className="edit-interests-subtitle">
+          Update tracked topics to customize relevance ranking.
         </p>
       </div>
 
@@ -120,22 +129,22 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
         </div>
       )}
 
-      {/* Confirmation Step: Profile created, prompt user to generate digest */}
-      {createdUser ? (
+      {/* Confirmation Step: Interests updated, prompt user to regenerate digest */}
+      {updatedUser ? (
         <div className="step-confirmation-box">
           <div className="confirmation-banner-success">
-            <span className="confirm-icon">🎉</span>
+            <span className="confirm-icon">✅</span>
             <div className="confirm-text">
-              <strong>Profile created for {createdUser.name}!</strong>
-              <p>Generate your first digest below.</p>
+              <strong>Interests updated!</strong>
+              <p>Regenerate your digest below.</p>
             </div>
           </div>
 
           <button
             type="button"
-            onClick={handleGenerateDigest}
+            onClick={handleRegenerateDigest}
             disabled={isGenerating}
-            className="btn-step-action btn-generate-step"
+            className="btn-step-action btn-regenerate-step"
           >
             {isGenerating ? (
               <>
@@ -143,33 +152,17 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
               </>
             ) : (
               <>
-                <span>⚡</span> Generate My Digest
+                <span>⚡</span> Regenerate Digest
               </>
             )}
           </button>
         </div>
       ) : (
-        /* Initial Profile Creation Form */
-        <form onSubmit={handleCreateProfile} className="onboarding-form">
-          <div className="form-field-group">
-            <label htmlFor="user-name-input" className="form-label">
-              Full Name
-            </label>
-            <input
-              id="user-name-input"
-              type="text"
-              className="styled-text-input"
-              placeholder="e.g. Grace Hopper"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={isCreating}
-              maxLength={100}
-            />
-          </div>
-
+        /* Interest Selection Form */
+        <form onSubmit={handleSaveChanges} className="edit-interests-form">
           <div className="form-field-group">
             <div className="interests-header-row">
-              <label className="form-label">Interest Topics</label>
+              <label className="form-label">Tracked Topics</label>
               <span className="interests-counter-pill">
                 {selectedTags.length} / 4 Selected
               </span>
@@ -184,22 +177,26 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
                 availableInterests={availableInterests}
                 selectedTags={selectedTags}
                 onChange={setSelectedTags}
-                disabled={isCreating}
+                disabled={isSaving}
               />
             )}
 
             <div className="interests-hint-row">
               {selectedTags.length < 2 ? (
                 <span className="hint-warning">
-                  💡 Please select at least 2 interests ({2 - selectedTags.length} more needed).
+                  💡 Select at least 2 interests ({2 - selectedTags.length} more needed).
                 </span>
               ) : selectedTags.length === 4 ? (
                 <span className="hint-info">
                   ✓ Maximum of 4 interest topics selected.
                 </span>
+              ) : !isChanged ? (
+                <span className="hint-info">
+                  Change selection to save updated preferences.
+                </span>
               ) : (
                 <span className="hint-success">
-                  ✓ Valid selection ({selectedTags.length} topics chosen). You can add up to 4.
+                  ✓ Ready to save new interest preferences.
                 </span>
               )}
             </div>
@@ -207,15 +204,15 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
 
           <button
             type="submit"
-            disabled={!canSubmit}
-            className="btn-submit-onboarding"
+            disabled={!canSave}
+            className="btn-submit-edit-interests"
           >
-            {isCreating ? (
+            {isSaving ? (
               <>
-                <span className="spinner-icon-sm"></span> Creating profile...
+                <span className="spinner-icon-sm"></span> Saving changes...
               </>
             ) : (
-              <>Create Profile</>
+              <>Save Changes</>
             )}
           </button>
         </form>

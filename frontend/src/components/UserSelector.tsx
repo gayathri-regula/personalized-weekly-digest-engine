@@ -23,10 +23,6 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
     try {
       const userList = await getUsers();
       setUsers(userList);
-      if (userList.length > 0 && !selectedUserId) {
-        // Auto-select first user if none selected
-        onUserSelect(userList[0]);
-      }
     } catch (err: unknown) {
       const msg =
         err instanceof Error ? err.message : "Failed to load user list.";
@@ -104,6 +100,11 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
             onChange={handleSelectChange}
             className="styled-select"
           >
+            {!selectedUserId && (
+              <option value="" disabled>
+                Select a user...
+              </option>
+            )}
             {users.map((user) => (
               <option key={user.id} value={user.id}>
                 {user.name} ({user.id})
