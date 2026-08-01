@@ -12,6 +12,15 @@ export interface UsersListResponse {
   users: User[];
 }
 
+export interface InterestsResponse {
+  interests: string[];
+}
+
+export interface CreateUserPayload {
+  name: string;
+  interest_tags: string[];
+}
+
 export interface DigestItem {
   id: string;
   activity_item_id: string;

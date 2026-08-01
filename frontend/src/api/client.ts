@@ -1,4 +1,4 @@
-import { Digest, User, UsersListResponse } from "../types";
+import { Digest, InterestsResponse, User, UsersListResponse } from "../types";
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
@@ -37,6 +37,71 @@ export async function getUsers(): Promise<User[]> {
     }
     throw new ApiError(
       "Unable to connect to backend server. Please verify backend service is running.",
+      0
+    );
+  }
+}
+
+/**
+ * Fetch domain interest taxonomy from backend.
+ */
+export async function getInterests(): Promise<string[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/interests`);
+    if (!response.ok) {
+      throw new ApiError(
+        `Failed to fetch interests taxonomy: HTTP ${response.status}`,
+        response.status
+      );
+    }
+    const data: InterestsResponse = await response.json();
+    return data.interests || [];
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Unable to connect to backend server. Please verify backend service is running.",
+      0
+    );
+  }
+}
+
+/**
+ * Register a new user profile on the backend.
+ */
+export async function createUser(
+  name: string,
+  interestTags: string[]
+): Promise<User> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        interest_tags: interestTags,
+      }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(
+        `Failed to create profile: ${detail}`,
+        response.status
+      );
+    }
+    const newUser: User = await response.json();
+    return newUser;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Backend server unreachable during user creation. Please try again.",
       0
     );
   }

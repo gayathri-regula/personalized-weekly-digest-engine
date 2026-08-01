@@ -1,14 +1,21 @@
 import React, { useState } from "react";
 import { DigestView } from "./components/DigestView";
-import { UserSelector } from "./components/UserSelector";
+import { SideDrawer } from "./components/SideDrawer";
 import { User } from "./types";
 import "./App.css";
 
 export const App: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [userRefreshKey, setUserRefreshKey] = useState<number>(0);
 
   const handleUserSelect = (user: User) => {
     setSelectedUser(user);
+  };
+
+  const handleUserCreated = (newUser: User) => {
+    setUserRefreshKey((prev) => prev + 1);
+    setSelectedUser(newUser);
   };
 
   return (
@@ -16,11 +23,22 @@ export const App: React.FC = () => {
       {/* Top Navbar */}
       <header className="app-navbar">
         <div className="navbar-container">
-          <div className="brand-logo">
-            <span className="logo-icon">⚡</span>
-            <div className="brand-text">
-              <span className="brand-name">Personalized Digest Engine</span>
-              <span className="brand-sub">AI Relevance Ranker & Prose Summarizer</span>
+          <div className="navbar-left">
+            <button
+              onClick={() => setIsDrawerOpen(true)}
+              className="hamburger-btn"
+              aria-label="Open profile controls drawer"
+            >
+              ☰
+            </button>
+            <div className="brand-logo">
+              <span className="logo-icon">⚡</span>
+              <div className="brand-text">
+                <span className="brand-name">Personalized Digest Engine</span>
+                <span className="brand-sub">
+                  AI Relevance Ranker & Prose Summarizer
+                </span>
+              </div>
             </div>
           </div>
           <div className="navbar-badge">
@@ -30,18 +48,20 @@ export const App: React.FC = () => {
         </div>
       </header>
 
+      {/* Side Drawer Component */}
+      <SideDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        selectedUserId={selectedUser?.id || null}
+        onUserSelect={handleUserSelect}
+        onUserCreated={handleUserCreated}
+        refreshKey={userRefreshKey}
+      />
+
       {/* Main Content Body */}
       <main className="app-main-content">
         <div className="content-container">
-          {/* User Selection Controls Bar */}
-          <section className="user-selection-bar">
-            <UserSelector
-              selectedUserId={selectedUser?.id || null}
-              onUserSelect={handleUserSelect}
-            />
-          </section>
-
-          {/* Digest View Section */}
+          {/* Main Digest View Section */}
           <section className="digest-display-area">
             <DigestView user={selectedUser} />
           </section>
@@ -50,7 +70,7 @@ export const App: React.FC = () => {
 
       {/* App Footer */}
       <footer className="app-footer">
-        <p>Personalized Weekly Digest Engine • Phase 9 React Frontend</p>
+        <p>Personalized Weekly Digest Engine • React Frontend</p>
       </footer>
     </div>
   );

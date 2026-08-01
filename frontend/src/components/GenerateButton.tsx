@@ -19,13 +19,20 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successToast, setSuccessToast] = useState<boolean>(false);
 
   const handleGenerate = async () => {
     setLoading(true);
     setErrorMsg(null);
+    setSuccessToast(false);
+
     try {
       const result = await generateDigest(userId);
       onSuccess(result);
+      setSuccessToast(true);
+      setTimeout(() => {
+        setSuccessToast(false);
+      }, 3500);
     } catch (err: unknown) {
       const message =
         err instanceof Error
@@ -45,7 +52,9 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
       <button
         onClick={handleGenerate}
         disabled={loading || !userId}
-        className={`btn-generate ${variant === "secondary" ? "btn-secondary" : "btn-primary"}`}
+        className={`btn-generate ${variant === "secondary" ? "btn-secondary" : "btn-primary"} ${
+          successToast ? "btn-success-flash" : ""
+        }`}
       >
         {loading ? (
           <>
@@ -67,6 +76,13 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
           </>
         )}
       </button>
+
+      {successToast && (
+        <div className="generate-success-toast">
+          <span className="toast-icon">✓</span>
+          <span>Digest regenerated successfully!</span>
+        </div>
+      )}
 
       {errorMsg && (
         <div className="generate-error-banner">

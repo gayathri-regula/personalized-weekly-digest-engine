@@ -5,11 +5,13 @@ import { User } from "../types";
 interface UserSelectorProps {
   selectedUserId: string | null;
   onUserSelect: (user: User) => void;
+  refreshKey?: number;
 }
 
 export const UserSelector: React.FC<UserSelectorProps> = ({
   selectedUserId,
   onUserSelect,
+  refreshKey = 0,
 }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -36,7 +38,17 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
 
   useEffect(() => {
     fetchUserList();
-  }, []);
+  }, [refreshKey]);
+
+  useEffect(() => {
+    if (
+      selectedUserId &&
+      users.length > 0 &&
+      !users.some((u) => u.id === selectedUserId)
+    ) {
+      fetchUserList();
+    }
+  }, [selectedUserId]);
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const userId = e.target.value;
@@ -48,7 +60,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
 
   const selectedUser = users.find((u) => u.id === selectedUserId);
 
-  if (loading) {
+  if (loading && users.length === 0) {
     return (
       <div className="user-selector-container skeleton-box">
         <span className="spinner-icon"></span>
@@ -57,7 +69,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
     );
   }
 
-  if (error) {
+  if (error && users.length === 0) {
     return (
       <div className="user-selector-container selector-error-box">
         <span className="error-badge">Connection Error</span>
