@@ -221,6 +221,30 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
           </div>
         )}
       </section>
+
+      {/* AI Suggestions Section */}
+      {digest.ai_suggestions && digest.ai_suggestions.length > 0 && (
+        <section className="ai-suggestions-section">
+          <div className="section-header suggestions-header">
+            <div className="header-title-group">
+              <h2>🤖 AI Suggestions - Exploratory topics you might also like</h2>
+              <span className="badge-ai-note">AI-generated, not from your ranked feed</span>
+            </div>
+          </div>
+
+          <div className="suggestions-grid">
+            {digest.ai_suggestions.map((suggestion, idx) => (
+              <article key={idx} className="ai-suggestion-card">
+                <div className="suggestion-card-header">
+                  <span className="sparkle-icon">✨</span>
+                  <h3 className="suggestion-title">{suggestion.title}</h3>
+                </div>
+                <p className="suggestion-description">{suggestion.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

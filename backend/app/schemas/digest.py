@@ -28,6 +28,15 @@ class DigestItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class AISuggestion(BaseModel):
+    """Schema representing an AI-generated exploratory topic suggestion."""
+
+    title: str = Field(..., description="Suggested topic title")
+    description: str = Field(..., description="Short topic description")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class DigestResponse(BaseModel):
     """Schema representing the full digest payload returned by API endpoints."""
 
@@ -44,6 +53,9 @@ class DigestResponse(BaseModel):
     )
     items: List[DigestItemResponse] = Field(
         default_factory=list, description="Top-ranked items for this digest"
+    )
+    ai_suggestions: List[AISuggestion] = Field(
+        default_factory=list, description="AI-generated exploratory topic suggestions"
     )
 
     model_config = ConfigDict(from_attributes=True)

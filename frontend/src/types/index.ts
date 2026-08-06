@@ -32,6 +32,11 @@ export interface DigestItem {
   rank_position: number;
 }
 
+export interface AISuggestion {
+  title: string;
+  description: string;
+}
+
 export interface Digest {
   id: string;
   user_id: string;
@@ -39,6 +44,7 @@ export interface Digest {
   generated_at: string;
   summary_prose: string;
   items: DigestItem[];
+  ai_suggestions?: AISuggestion[];
 }
 
 export interface ApiFetchResult<T> {

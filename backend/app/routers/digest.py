@@ -11,7 +11,8 @@ from app.models.activity_item import ActivityItem
 from app.models.digest import Digest
 from app.models.digest_item import DigestItem
 from app.models.user import User
-from app.schemas.digest import DigestItemResponse, DigestResponse
+from app.schemas.digest import AISuggestion, DigestItemResponse, DigestResponse
+from app.services.ai_suggestions import generate_ai_suggestions
 from app.services.ranker import rank_items_for_user
 from app.services.summarizer import generate_digest_summary
 from app.utils import get_reference_now, get_week_identifier
@@ -72,6 +73,13 @@ async def generate_user_digest(
         use_llm=True,
     )
 
+    # 6. Generate AI suggestions (exploratory, separate from ranked items)
+    ai_suggestions = generate_ai_suggestions(
+        user_name=user.name,
+        interest_tags=user.interest_tags or [],
+        use_llm=True,
+    )
+
     # 6. Upsert Digest record per (user_id, week_identifier) with real generation time
     digest_stmt = select(Digest).where(
         Digest.user_id == user_id, Digest.week_identifier == week_id
@@ -83,6 +91,7 @@ async def generate_user_digest(
         digest_obj = existing_digest
         digest_obj.generated_at = actual_generation_time
         digest_obj.summary_prose = summary_prose
+        digest_obj.ai_suggestions = ai_suggestions
         # Delete existing DigestItem rows for upsert replacement
         await db.execute(
             delete(DigestItem).where(DigestItem.digest_id == digest_obj.id)
@@ -95,6 +104,7 @@ async def generate_user_digest(
             week_identifier=week_id,
             generated_at=actual_generation_time,
             summary_prose=summary_prose,
+            ai_suggestions=ai_suggestions,
         )
         db.add(digest_obj)
 
@@ -134,6 +144,7 @@ async def generate_user_digest(
         generated_at=digest_obj.generated_at,
         summary_prose=summary_prose,
         items=response_items,
+        ai_suggestions=[AISuggestion(**s) for s in (digest_obj.ai_suggestions or [])],
     )
 
 
@@ -209,4 +220,5 @@ async def get_latest_user_digest(
         generated_at=digest_obj.generated_at,
         summary_prose=digest_obj.summary_prose,
         items=response_items,
+        ai_suggestions=[AISuggestion(**s) for s in (digest_obj.ai_suggestions or [])],
     )

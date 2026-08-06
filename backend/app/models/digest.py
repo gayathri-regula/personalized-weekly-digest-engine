@@ -1,8 +1,8 @@
 """SQLAlchemy ORM model for Digest entity."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List
-from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
@@ -30,6 +30,9 @@ class Digest(Base):
         DateTime(timezone=True), nullable=False
     )
     summary_prose: Mapped[str] = mapped_column(Text, nullable=False)
+    ai_suggestions: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(
+        JSON, nullable=True
+    )
 
     user: Mapped["User"] = relationship("User", back_populates="digests")
     items: Mapped[List["DigestItem"]] = relationship(
