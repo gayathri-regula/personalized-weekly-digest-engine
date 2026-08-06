@@ -47,13 +47,15 @@ def build_claude_prompt(
     joined_items = "\n\n".join(items_text_blocks)
 
     return (
-        f"You are writing a personalized weekly digest executive summary for {user_name}.\n"
-        f"Here are the top-ranked activity items for {user_name} this week:\n\n"
+        f"You are crafting a personalized, high-value weekly digest executive summary for {user_name}.\n"
+        f"Here are the top-ranked activity items curated specifically for {user_name} this week:\n\n"
         f"{joined_items}\n\n"
-        "Instructions:\n"
-        f"- Write a warm, professional 2-4 sentence executive summary highlighting key themes across these items for {user_name}.\n"
-        "- Do NOT invent or hallucinate any facts not present in the provided titles or snippets.\n"
-        "- Return ONLY the final executive summary paragraph without markdown headers, bullet points, or introductory conversational filler."
+        "Instructions & Phrasing Guidance:\n"
+        f"1. Executive Summary Quality: Compose a fluid, articulate, 2-4 sentence executive summary synthesized specifically for {user_name}.\n"
+        "2. Dynamic & Varied Phrasing: Vary your opening hooks, transitional phrasing, and synthesis structure across calls (e.g., framing around emerging architectural trends, key technical takeaways, strategic industry shifts, or actionable engineering highlights). Avoid repetitive formulaic templates.\n"
+        "3. Strict Grounding: Base all insights strictly on the provided item titles, snippets, and match explanations ('explanation_text'). Do NOT invent, assume, or hallucinate external facts, items, or scores.\n"
+        "4. Truthful Relevance: Seamlessly connect the highlighted topics to the matching user interests indicated in the explanation texts (e.g., 'because you follow ...').\n"
+        "5. Output Format: Output ONLY the final executive summary paragraph without any markdown headings, bulleted lists, intro preambles, or conversational sign-offs."
     )
 
 
