@@ -125,3 +125,70 @@ def test_explanation_text_lists_overlapping_tags():
 
     explanation = derive_explanation(set(user_interests).intersection(set(item_tags)))
     assert explanation == "because you follow AI, Python"
+
+
+def test_boost_tag_new_interest_explanation_wording():
+    """Test that boosting a tag not in user interests updates explanation text truthfully."""
+    now = datetime(2026, 7, 28, 12, 0, 0, tzinfo=timezone.utc)
+    user = {"id": "user_1", "interest_tags": ["AI"]}
+
+    item_cloud = {
+        "id": "item_cloud",
+        "category_tags": ["Cloud"],
+        "created_at": now - timedelta(hours=1),
+        "engagement_metadata": {"views": 100, "likes": 10, "shares": 2},
+    }
+    item_mixed = {
+        "id": "item_mixed",
+        "category_tags": ["AI", "Cloud"],
+        "created_at": now - timedelta(hours=1),
+        "engagement_metadata": {"views": 100, "likes": 10, "shares": 2},
+    }
+
+    ranked = rank_items_for_user(user, [item_cloud, item_mixed], boost_tag="Cloud", now=now)
+    assert len(ranked) == 2
+
+    by_id = {r.activity_item_id: r for r in ranked}
+    assert by_id["item_cloud"].explanation_text == "related to trending topic: Cloud"
+    assert by_id["item_mixed"].explanation_text == "because you follow AI and related to trending topic: Cloud"
+
+
+def test_boost_tag_already_in_interests_no_duplication():
+    """Test that boosting a tag already in user interests does not duplicate or alter explanation structure."""
+    now = datetime(2026, 7, 28, 12, 0, 0, tzinfo=timezone.utc)
+    user = {"id": "user_1", "interest_tags": ["AI", "Python"]}
+
+    item = {
+        "id": "item_1",
+        "category_tags": ["AI"],
+        "created_at": now - timedelta(hours=1),
+        "engagement_metadata": {"views": 100, "likes": 10, "shares": 2},
+    }
+
+    ranked_normal = rank_items_for_user(user, [item], boost_tag=None, now=now)
+    ranked_boosted = rank_items_for_user(user, [item], boost_tag="AI", now=now)
+
+    assert len(ranked_normal) == 1 and len(ranked_boosted) == 1
+    assert ranked_boosted[0].explanation_text == "because you follow AI"
+    assert "trending topic" not in ranked_boosted[0].explanation_text
+
+
+def test_boost_tag_default_none_preserves_behavior():
+    """Test that omitting boost_tag produces 100% identical output to explicit boost_tag=None."""
+    now = datetime(2026, 7, 28, 12, 0, 0, tzinfo=timezone.utc)
+    user = {"id": "user_1", "interest_tags": ["Python"]}
+    items = [
+        {
+            "id": "item_1",
+            "category_tags": ["Python"],
+            "created_at": now - timedelta(hours=2),
+            "engagement_metadata": {"views": 200, "likes": 20, "shares": 5},
+        }
+    ]
+
+    r1 = rank_items_for_user(user, items, now=now)
+    r2 = rank_items_for_user(user, items, boost_tag=None, now=now)
+
+    assert r1[0].relevance_score == r2[0].relevance_score
+    assert r1[0].explanation_text == r2[0].explanation_text
+

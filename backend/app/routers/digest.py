@@ -6,18 +6,79 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.constants import INTEREST_TAXONOMY
 from app.db.session import get_db
 from app.models.activity_item import ActivityItem
 from app.models.digest import Digest
 from app.models.digest_item import DigestItem
 from app.models.user import User
-from app.schemas.digest import AISuggestion, DigestItemResponse, DigestResponse
+from app.schemas.digest import (
+    AISuggestion,
+    BoostRequest,
+    BoostedDigestResponse,
+    DigestItemResponse,
+    DigestResponse,
+)
 from app.services.ai_suggestions import generate_ai_suggestions
 from app.services.ranker import rank_items_for_user
 from app.services.summarizer import generate_digest_summary
 from app.utils import get_reference_now, get_week_identifier
 
 router = APIRouter(prefix="/digest", tags=["digest"])
+
+
+@router.post("/{user_id}/boost", response_model=BoostedDigestResponse)
+async def boost_user_digest(
+    user_id: str, boost_in: BoostRequest, db: AsyncSession = Depends(get_db)
+) -> BoostedDigestResponse:
+    """Generate a transient, read-only preview of user digest boosted by a specific taxonomy tag."""
+    if boost_in.tag not in INTEREST_TAXONOMY:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Tag '{boost_in.tag}' is not a valid taxonomy interest tag.",
+        )
+
+    # 1. Fetch user by user_id
+    user_result = await db.execute(select(User).where(User.id == user_id))
+    user = user_result.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User '{user_id}' not found",
+        )
+
+    # 2. Fetch all activity items
+    items_result = await db.execute(
+        select(ActivityItem).order_by(ActivityItem.created_at.desc())
+    )
+    items = items_result.scalars().all()
+    items_by_id = {item.id: item for item in items}
+
+    ref_now = get_reference_now()
+
+    # 3. Score and rank items with boost_tag (read-only preview)
+    ranked_items = rank_items_for_user(
+        user=user, items=items, top_n=5, now=ref_now, boost_tag=boost_in.tag
+    )
+
+    response_items = []
+    for r in ranked_items:
+        act_item = items_by_id.get(r.activity_item_id)
+        ditem_id = f"boost_{r.activity_item_id}"
+        response_items.append(
+            DigestItemResponse(
+                id=ditem_id,
+                activity_item_id=r.activity_item_id,
+                title=act_item.title if act_item else "Untitled",
+                content=act_item.content if act_item else "",
+                category_tags=act_item.category_tags if act_item else [],
+                relevance_score=r.relevance_score,
+                explanation_text=r.explanation_text,
+                rank_position=r.rank_position,
+            )
+        )
+
+    return BoostedDigestResponse(boost_tag=boost_in.tag, items=response_items)
 
 
 @router.post("/{user_id}", response_model=DigestResponse)

@@ -35,6 +35,12 @@ export interface DigestItem {
 export interface AISuggestion {
   title: string;
   description: string;
+  related_tag: string;
+}
+
+export interface BoostedDigest {
+  boost_tag: string;
+  items: DigestItem[];
 }
 
 export interface Digest {

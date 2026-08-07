@@ -24,8 +24,10 @@ def test_generate_fallback_ai_suggestions():
     for s in suggestions:
         assert "title" in s
         assert "description" in s
+        assert "related_tag" in s
         assert len(s["title"]) > 0
         assert len(s["description"]) > 0
+        assert s["related_tag"] in ["Backend Engineering", "DevOps"]
 
 
 def test_generate_ai_suggestions_use_llm_false():
@@ -34,6 +36,7 @@ def test_generate_ai_suggestions_use_llm_false():
     for s in suggestions:
         assert "title" in s
         assert "description" in s
+        assert "related_tag" in s
 
 
 def test_generate_ai_suggestions_missing_api_key(monkeypatch):
@@ -43,6 +46,7 @@ def test_generate_ai_suggestions_missing_api_key(monkeypatch):
     for s in suggestions:
         assert "title" in s
         assert "description" in s
+        assert "related_tag" in s
 
 
 def test_generate_ai_suggestions_llm_success_mocked():
@@ -50,9 +54,9 @@ def test_generate_ai_suggestions_llm_success_mocked():
     mock_content_block = MagicMock()
     mock_content_block.text = (
         '[\n'
-        '  {"title": "Idea 1", "description": "Desc 1"},\n'
-        '  {"title": "Idea 2", "description": "Desc 2"},\n'
-        '  {"title": "Idea 3", "description": "Desc 3"}\n'
+        '  {"title": "Idea 1", "description": "Desc 1", "related_tag": "UI/UX Design"},\n'
+        '  {"title": "Idea 2", "description": "Desc 2", "related_tag": "Cloud"},\n'
+        '  {"title": "Idea 3", "description": "Desc 3", "related_tag": "Security"}\n'
         ']'
     )
     mock_response = MagicMock()
@@ -65,6 +69,7 @@ def test_generate_ai_suggestions_llm_success_mocked():
     assert len(suggestions) == 3
     assert suggestions[0]["title"] == "Idea 1"
     assert suggestions[0]["description"] == "Desc 1"
+    assert suggestions[0]["related_tag"] == "UI/UX Design"
     assert suggestions[1]["title"] == "Idea 2"
     assert suggestions[2]["title"] == "Idea 3"
 
@@ -80,3 +85,4 @@ def test_generate_ai_suggestions_llm_exception_fallback():
     for s in suggestions:
         assert "title" in s
         assert "description" in s
+        assert "related_tag" in s

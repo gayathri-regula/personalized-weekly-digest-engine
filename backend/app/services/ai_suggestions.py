@@ -9,6 +9,8 @@ import logging
 import os
 from typing import Any, Dict, List, Optional
 
+from app.constants import INTEREST_TAXONOMY
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_CLAUDE_MODEL: str = "claude-sonnet-4-6"
@@ -22,25 +24,36 @@ def generate_fallback_ai_suggestions(interest_tags: List[str]) -> List[Dict[str,
         interest_tags: List of interest tag strings for the user.
 
     Returns:
-        List[Dict[str, str]]: Exactly 3 dicts with 'title' and 'description'.
+        List[Dict[str, str]]: Exactly 3 dicts with 'title', 'description', and 'related_tag'.
     """
-    primary = interest_tags[0] if interest_tags else "Technology"
-    secondary = interest_tags[1] if len(interest_tags) > 1 else primary
-    tertiary = interest_tags[2] if len(interest_tags) > 2 else secondary
+    primary = interest_tags[0] if interest_tags else INTEREST_TAXONOMY[0]
+    secondary = (
+        interest_tags[1]
+        if len(interest_tags) > 1
+        else (interest_tags[0] if interest_tags else INTEREST_TAXONOMY[1])
+    )
+    tertiary = (
+        interest_tags[2]
+        if len(interest_tags) > 2
+        else (interest_tags[0] if interest_tags else INTEREST_TAXONOMY[2])
+    )
 
     return [
         {
             "title": f"Emerging Trends in {primary} Architecture",
-            "description": f"Explore upcoming patterns, novel tools, and community discussions shaping modern {primary} projects."
+            "description": f"Explore upcoming patterns, novel tools, and community discussions shaping modern {primary} projects.",
+            "related_tag": primary,
         },
         {
             "title": f"Best Practices for {secondary} Integration",
-            "description": f"Practical strategies and architectural blueprints for integrating {secondary} into scalable engineering workflows."
+            "description": f"Practical strategies and architectural blueprints for integrating {secondary} into scalable engineering workflows.",
+            "related_tag": secondary,
         },
         {
             "title": f"Next-Generation {tertiary} Tooling & Insights",
-            "description": f"A forward-looking exploration of upcoming open-source libraries and performance benchmarks in {tertiary}."
-        }
+            "description": f"A forward-looking exploration of upcoming open-source libraries and performance benchmarks in {tertiary}.",
+            "related_tag": tertiary,
+        },
     ]
 
 
@@ -55,15 +68,17 @@ def build_ai_suggestions_prompt(user_name: str, interest_tags: List[str]) -> str
         str: Formatted user prompt string.
     """
     tags_str = ", ".join(interest_tags) if interest_tags else "general technology"
+    taxonomy_str = ", ".join(INTEREST_TAXONOMY)
     return (
         f"You are an AI technical assistant generating exploratory content suggestions for {user_name}.\n"
         f"{user_name} is interested in the following topics: {tags_str}.\n\n"
         "Instructions:\n"
         "1. Generate EXACTLY 3 distinct, high-quality topic ideas that {user_name} might find interesting.\n"
         "2. Note: These are exploratory suggestions and topic concepts, NOT real published articles.\n"
-        "3. For each suggestion, provide a concise 'title' and a short 'description' (1-2 sentences).\n"
-        "4. Return ONLY a valid JSON array of objects with keys 'title' and 'description'. Do not include markdown codeblock wrappers, headers, or conversational text.\n"
-        'Example format:\n[\n  {"title": "Topic Title 1", "description": "Short explanation 1."},\n  {"title": "Topic Title 2", "description": "Short explanation 2."},\n  {"title": "Topic Title 3", "description": "Short explanation 3."}\n]'
+        "3. For each suggestion, provide a concise 'title', a short 'description' (1-2 sentences), and a 'related_tag'.\n"
+        f"4. The 'related_tag' field MUST be exactly one tag from this taxonomy list: {taxonomy_str}. Suggestions may explore tags slightly beyond the user's current interests, but related_tag must always be a valid taxonomy value.\n"
+        "5. Return ONLY a valid JSON array of objects with keys 'title', 'description', and 'related_tag'. Do not include markdown codeblock wrappers, headers, or conversational text.\n"
+        'Example format:\n[\n  {"title": "Topic Title 1", "description": "Short explanation 1.", "related_tag": "AI"},\n  {"title": "Topic Title 2", "description": "Short explanation 2.", "related_tag": "Cloud"},\n  {"title": "Topic Title 3", "description": "Short explanation 3.", "related_tag": "DevOps"}\n]'
     )
 
 
@@ -82,7 +97,7 @@ def call_llm_ai_suggestions(
         timeout: API call timeout in seconds.
 
     Returns:
-        List[Dict[str, str]]: List of 3 suggestion dicts with 'title' and 'description'.
+        List[Dict[str, str]]: List of 3 suggestion dicts with 'title', 'description', and 'related_tag'.
     """
     prompt = build_ai_suggestions_prompt(user_name, interest_tags)
 
@@ -121,15 +136,23 @@ def call_llm_ai_suggestions(
         if isinstance(parsed, list) and len(parsed) > 0:
             suggestions = []
             for item in parsed[:3]:
-                if isinstance(item, dict) and "title" in item and "description" in item:
-                    suggestions.append({
-                        "title": str(item["title"]),
-                        "description": str(item["description"])
-                    })
+                if (
+                    isinstance(item, dict)
+                    and "title" in item
+                    and "description" in item
+                    and "related_tag" in item
+                ):
+                    tag = str(item["related_tag"]).strip()
+                    if tag in INTEREST_TAXONOMY:
+                        suggestions.append({
+                            "title": str(item["title"]),
+                            "description": str(item["description"]),
+                            "related_tag": tag,
+                        })
             if len(suggestions) == 3:
                 return suggestions
 
-    raise RuntimeError("LLM response did not contain 3 valid suggestion objects.")
+    raise RuntimeError("LLM response did not contain 3 valid suggestion objects with valid taxonomy related_tag.")
 
 
 def generate_ai_suggestions(
@@ -150,7 +173,7 @@ def generate_ai_suggestions(
         client: Optional injected client or mock client.
 
     Returns:
-        List[Dict[str, str]]: 3 suggestion dicts containing 'title' and 'description'.
+        List[Dict[str, str]]: 3 suggestion dicts containing 'title', 'description', and 'related_tag'.
     """
     if use_llm:
         try:
@@ -169,3 +192,4 @@ def generate_ai_suggestions(
             )
 
     return generate_fallback_ai_suggestions(interest_tags)
+

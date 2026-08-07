@@ -1,4 +1,10 @@
-import { Digest, InterestsResponse, User, UsersListResponse } from "../types";
+import {
+  BoostedDigest,
+  Digest,
+  InterestsResponse,
+  User,
+  UsersListResponse,
+} from "../types";
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
@@ -204,3 +210,44 @@ export async function generateDigest(userId: string): Promise<Digest> {
     );
   }
 }
+
+/**
+ * Temporarily boost digest items by a specific taxonomy tag.
+ */
+export async function boostDigest(
+  userId: string,
+  tag: string
+): Promise<BoostedDigest> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/digest/${userId}/boost`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tag }),
+      }
+    );
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(
+        `Failed to boost digest items: ${detail}`,
+        response.status
+      );
+    }
+    const data: BoostedDigest = await response.json();
+    return data;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Backend server unreachable during digest boost. Please try again.",
+      0
+    );
+  }
+}
+

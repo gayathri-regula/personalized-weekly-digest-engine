@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List
 from pydantic import BaseModel, ConfigDict, Field
-
+from typing import List, Optional
 
 class DigestItemResponse(BaseModel):
     """Schema representing an individual ranked activity item within a digest response."""
@@ -29,12 +29,25 @@ class DigestItemResponse(BaseModel):
 
 
 class AISuggestion(BaseModel):
-    """Schema representing an AI-generated exploratory topic suggestion."""
-
     title: str = Field(..., description="Suggested topic title")
     description: str = Field(..., description="Short topic description")
-
+    related_tag: Optional[str] = Field(default=None, description="Taxonomy tag this suggestion relates to")
     model_config = ConfigDict(from_attributes=True)
+
+
+class BoostRequest(BaseModel):
+    """Schema representing a request to boost digest items by tag."""
+
+    tag: str = Field(..., description="Taxonomy tag to temporarily boost")
+
+
+class BoostedDigestResponse(BaseModel):
+    """Schema representing a transient, non-persisted boosted digest preview."""
+
+    boost_tag: str = Field(..., description="The taxonomy tag used for boosting")
+    items: List[DigestItemResponse] = Field(
+        default_factory=list, description="Top-ranked items boosted by the tag"
+    )
 
 
 class DigestResponse(BaseModel):

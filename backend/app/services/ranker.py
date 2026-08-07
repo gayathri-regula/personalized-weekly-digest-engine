@@ -7,7 +7,7 @@ explanations without external API or LLM dependencies.
 
 import math
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 from pydantic import BaseModel, Field
 
 # Weights for relevance score formula per ARCHITECTURE.md Section 3.1
@@ -148,6 +148,7 @@ def rank_items_for_user(
     items: Sequence[Any],
     top_n: int = 5,
     now: datetime | None = None,
+    boost_tag: Optional[str] = None,
 ) -> List[RankedItem]:
     """Score and rank activity items for a user deterministically.
 
@@ -156,6 +157,7 @@ def rank_items_for_user(
         items: List of ActivityItem entities to score.
         top_n: Maximum number of top items to return (default 5).
         now: Optional reference scoring time.
+        boost_tag: Optional taxonomy tag string to temporarily boost matching items.
 
     Returns:
         List[RankedItem]: Ranked items sorted descending by relevance_score,
@@ -165,21 +167,28 @@ def rank_items_for_user(
         now = datetime.now(timezone.utc)
 
     user_interests = _get_attr(user, "interest_tags", []) or []
+    real_interests_set = set(user_interests)
+
+    if boost_tag:
+        effective_interests = list(real_interests_set | {boost_tag})
+    else:
+        effective_interests = list(user_interests)
 
     scored_items: List[Tuple[float, str, datetime, str, str]] = []
 
     for item in items:
         item_id = str(_get_attr(item, "id"))
         item_tags = _get_attr(item, "category_tags", []) or []
+        item_tags_set = set(item_tags)
         created_at = _get_attr(item, "created_at")
         engagement = _get_attr(item, "engagement_metadata", {}) or {}
 
-        # Determine overlapping tags
-        matching_set = set(user_interests).intersection(set(item_tags))
-        matching_tags = sorted(list(matching_set))
+        # Determine real overlapping tags (from saved user interest tags only)
+        real_matching_set = real_interests_set.intersection(item_tags_set)
+        real_matching_tags = sorted(list(real_matching_set))
 
-        # Compute individual score components
-        tag_score = compute_tag_match_score(user_interests, item_tags)
+        # Compute individual score components using effective tag set
+        tag_score = compute_tag_match_score(effective_interests, item_tags)
         recency_score = compute_recency_decay(created_at, now=now)
         engagement_score = compute_engagement_score(engagement)
 
@@ -195,7 +204,23 @@ def rank_items_for_user(
         if bounded_score < MIN_RELEVANCE_THRESHOLD:
             continue
 
-        explanation = derive_explanation(matching_tags)
+        # Explanation logic for boost_tag vs standard user interests
+        boost_matched_new = bool(
+            boost_tag
+            and (boost_tag in item_tags_set)
+            and (boost_tag not in real_interests_set)
+        )
+
+        if boost_matched_new:
+            if real_matching_tags:
+                joined_real = ", ".join(real_matching_tags)
+                explanation = (
+                    f"because you follow {joined_real} and related to trending topic: {boost_tag}"
+                )
+            else:
+                explanation = f"related to trending topic: {boost_tag}"
+        else:
+            explanation = derive_explanation(real_matching_tags)
 
         scored_items.append(
             (bounded_score, item_id, created_at, explanation, item_id)

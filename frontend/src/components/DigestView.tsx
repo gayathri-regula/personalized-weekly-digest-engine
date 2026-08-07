@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getDigest } from "../api/client";
-import { Digest, User } from "../types";
+import { boostDigest, getDigest } from "../api/client";
+import { Digest, DigestItem, User } from "../types";
 import { GenerateButton } from "./GenerateButton";
 
 interface DigestViewProps {
@@ -13,7 +13,19 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
   const [isNotFound, setIsNotFound] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Boost interaction state
+  const [boostedItems, setBoostedItems] = useState<DigestItem[] | null>(null);
+  const [activeBoostTag, setActiveBoostTag] = useState<string | null>(null);
+  const [boostingTag, setBoostingTag] = useState<string | null>(null);
+  const [boostError, setBoostError] = useState<string | null>(null);
+
   useEffect(() => {
+    // Reset boost state when user changes
+    setBoostedItems(null);
+    setActiveBoostTag(null);
+    setBoostingTag(null);
+    setBoostError(null);
+
     if (!user) {
       setDigest(null);
       setIsNotFound(false);
@@ -62,6 +74,33 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
     setDigest(newDigest);
     setIsNotFound(false);
     setErrorMessage(null);
+    setBoostedItems(null);
+    setActiveBoostTag(null);
+    setBoostingTag(null);
+    setBoostError(null);
+  };
+
+  const handleSuggestionClick = async (tag: string) => {
+    if (!user || boostingTag === tag) return;
+    setBoostingTag(tag);
+    setBoostError(null);
+    try {
+      const result = await boostDigest(user.id, tag);
+      setActiveBoostTag(result.boost_tag);
+      setBoostedItems(result.items);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to boost digest items.";
+      setBoostError(msg);
+    } finally {
+      setBoostingTag(null);
+    }
+  };
+
+  const handleResetBoost = () => {
+    setActiveBoostTag(null);
+    setBoostedItems(null);
+    setBoostError(null);
   };
 
   if (!user) {
@@ -132,6 +171,8 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
     );
   }
 
+  const itemsToDisplay = boostedItems !== null ? boostedItems : digest.items;
+
   return (
     <div className="digest-view-container">
       {/* Digest Header */}
@@ -172,16 +213,41 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
       <section className="ranked-items-section">
         <div className="section-header">
           <h2>Top-Ranked Highlights for You</h2>
-          <span className="count-badge">{digest.items.length} Items</span>
+          <span className="count-badge">{itemsToDisplay.length} Items</span>
         </div>
 
-        {digest.items.length === 0 ? (
+        {/* Boost Banner */}
+        {activeBoostTag && (
+          <div className="boost-banner">
+            <div className="boost-banner-info">
+              <span className="boost-icon">⚡</span>
+              <span>
+                Showing items boosted by: <strong>{activeBoostTag}</strong>
+              </span>
+            </div>
+            <button
+              onClick={handleResetBoost}
+              className="btn-reset-boost"
+              title="Restore original digest"
+            >
+              Reset to my digest
+            </button>
+          </div>
+        )}
+
+        {boostError && (
+          <div className="boost-error-banner">
+            <span>⚠️ {boostError}</span>
+          </div>
+        )}
+
+        {itemsToDisplay.length === 0 ? (
           <div className="no-items-card">
             <p>No highly relevant activity updates were found for your interest topics this week.</p>
           </div>
         ) : (
           <div className="items-grid">
-            {digest.items.map((item) => {
+            {itemsToDisplay.map((item) => {
               const relevancePercent = Math.round(item.relevance_score * 100);
 
               return (
@@ -228,20 +294,59 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
           <div className="section-header suggestions-header">
             <div className="header-title-group">
               <h2>🤖 AI Suggestions - Exploratory topics you might also like</h2>
-              <span className="badge-ai-note">AI-generated, not from your ranked feed</span>
+              <span className="badge-ai-note">AI-generated • Click card to boost items</span>
             </div>
           </div>
 
           <div className="suggestions-grid">
-            {digest.ai_suggestions.map((suggestion, idx) => (
-              <article key={idx} className="ai-suggestion-card">
-                <div className="suggestion-card-header">
-                  <span className="sparkle-icon">✨</span>
-                  <h3 className="suggestion-title">{suggestion.title}</h3>
-                </div>
-                <p className="suggestion-description">{suggestion.description}</p>
-              </article>
-            ))}
+            {digest.ai_suggestions.map((suggestion, idx) => {
+              const isBoostingThis = boostingTag === suggestion.related_tag;
+              const isActive = activeBoostTag === suggestion.related_tag;
+
+              return (
+                <article
+                  key={idx}
+                  className={`ai-suggestion-card clickable ${
+                    isActive ? "suggestion-card-active" : ""
+                  } ${isBoostingThis ? "suggestion-card-loading" : ""}`}
+                  onClick={() => handleSuggestionClick(suggestion.related_tag)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleSuggestionClick(suggestion.related_tag);
+                    }
+                  }}
+                >
+                  <div className="suggestion-card-header">
+                    <span className="sparkle-icon">✨</span>
+                    <h3 className="suggestion-title">{suggestion.title}</h3>
+                    {suggestion.related_tag && (
+                      <span className="suggestion-tag-pill">
+                        ⚡ {suggestion.related_tag}
+                      </span>
+                    )}
+                  </div>
+                  <p className="suggestion-description">{suggestion.description}</p>
+
+                  <div className="suggestion-card-footer">
+                    {isBoostingThis ? (
+                      <span className="boosting-indicator">
+                        <span className="spinner-icon-sm-purple"></span> Boosting...
+                      </span>
+                    ) : isActive ? (
+                      <span className="active-boost-indicator">
+                        ✓ Currently Boosting
+                      </span>
+                    ) : (
+                      <span className="click-boost-hint">
+                        Click to preview boosted items →
+                      </span>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
       )}
