@@ -39,6 +39,7 @@ export interface DigestItem {
   explanation_text: string;
   rank_position: number;
   feedback_type?: string | null;
+  created_at?: string;
 }
 
 export interface AISuggestion {

@@ -186,9 +186,13 @@ export async function getDigest(userId: string): Promise<Digest | null> {
 /**
  * Trigger on-demand generation (or regeneration) of a weekly digest for a user.
  */
-export async function generateDigest(userId: string): Promise<Digest> {
+export async function generateDigest(
+  userId: string,
+  diversity: boolean = false
+): Promise<Digest> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/digest/${userId}`, {
+    const url = `${API_BASE_URL}/api/digest/${userId}${diversity ? "?diversity=true" : ""}`;
+    const response = await fetch(url, {
       method: "POST",
     });
     if (!response.ok) {

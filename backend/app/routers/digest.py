@@ -85,6 +85,7 @@ async def boost_user_digest(
                 explanation_text=r.explanation_text,
                 rank_position=r.rank_position,
                 feedback_type=feedback_map.get(r.activity_item_id),
+                created_at=act_item.created_at if act_item else None,
             )
         )
 
@@ -93,7 +94,9 @@ async def boost_user_digest(
 
 @router.post("/{user_id}", response_model=DigestResponse)
 async def generate_user_digest(
-    user_id: str, db: AsyncSession = Depends(get_db)
+    user_id: str,
+    diversity: bool = False,
+    db: AsyncSession = Depends(get_db),
 ) -> DigestResponse:
     """Generate or update (upsert) the weekly personalized digest for a user."""
     # 1. Fetch user by user_id
@@ -118,7 +121,7 @@ async def generate_user_digest(
 
     # 3. Score and rank items using dataset reference time (ref_now)
     ranked_items = rank_items_for_user(
-        user=user, items=items, top_n=5, now=ref_now
+        user=user, items=items, top_n=5, now=ref_now, diversity_boost=diversity
     )
 
     # 4. Join ranked items with full ActivityItem data for summarizer
@@ -134,6 +137,7 @@ async def generate_user_digest(
                 "title": act_item.title if act_item else "Untitled",
                 "content": act_item.content if act_item else "",
                 "category_tags": act_item.category_tags if act_item else [],
+                "created_at": act_item.created_at if act_item else None,
             }
         )
 
@@ -212,6 +216,7 @@ async def generate_user_digest(
                 explanation_text=r.explanation_text,
                 rank_position=r.rank_position,
                 feedback_type=feedback_map.get(r.activity_item_id),
+                created_at=detail["created_at"],
             )
         )
 
@@ -299,6 +304,7 @@ async def get_latest_user_digest(
                 explanation_text=di.explanation_text,
                 rank_position=di.rank_position,
                 feedback_type=feedback_map.get(di.activity_item_id),
+                created_at=act.created_at if act else None,
             )
         )
 

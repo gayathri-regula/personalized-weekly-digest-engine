@@ -7,6 +7,21 @@ interface DigestViewProps {
   user: User | null;
 }
 
+function formatRelativeTime(dateStr?: string): string | null {
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return null;
+  const refNow = new Date("2026-07-25T12:00:00Z");
+  const diffMs = refNow.getTime() - date.getTime();
+  if (diffMs < 0) return "Recently";
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) return "Just now";
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "1 day ago";
+  return `${diffDays} days ago`;
+}
+
 export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
   const [digest, setDigest] = useState<Digest | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -21,6 +36,16 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
 
   // Local feedback state map: activityItemId -> feedback_type ("useful" | "not_useful" | "not_interested")
   const [feedbackState, setFeedbackState] = useState<Record<string, string>>({});
+
+  // Client-side save / bookmark state map: activityItemId -> boolean
+  const [savedItemIds, setSavedItemIds] = useState<Record<string, boolean>>({});
+
+  const toggleSaveItem = (itemId: string) => {
+    setSavedItemIds((prev) => ({
+      ...prev,
+      [itemId]: !prev[itemId],
+    }));
+  };
 
   useEffect(() => {
     // Reset boost state when user changes
@@ -209,9 +234,27 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
   }
 
   const itemsToDisplay = boostedItems !== null ? boostedItems : digest.items;
+  const totalInterests = user.interest_tags ? user.interest_tags.length : 0;
+  const itemsCount = itemsToDisplay.length;
+  const avgMatchPercent =
+    itemsCount > 0
+      ? Math.round(
+          (itemsToDisplay.reduce((acc, item) => acc + item.relevance_score, 0) /
+            itemsCount) *
+            100
+        )
+      : 0;
 
   return (
     <div className="digest-view-container">
+      {/* Hero Intro Banner */}
+      <div className="hero-intro-banner">
+        <h1 className="hero-title">Your Weekly Digest</h1>
+        <p className="hero-subtitle">
+          AI-curated updates based on the topics you follow.
+        </p>
+      </div>
+
       {/* Digest Header */}
       <header className="digest-header">
         <div className="header-titles">
@@ -220,7 +263,8 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
             Hi {user.name.split(" ")[0]}, here is your weekly digest
           </h1>
           <p className="timestamp-subtitle">
-            Generated on {new Date(digest.generated_at).toLocaleDateString(undefined, {
+            Generated on{" "}
+            {new Date(digest.generated_at).toLocaleDateString(undefined, {
               weekday: "long",
               year: "numeric",
               month: "short",
@@ -236,6 +280,22 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
           variant="secondary"
         />
       </header>
+
+      {/* Dashboard Stats Header */}
+      <div className="dashboard-stats-row">
+        <div className="stat-card">
+          <span className="stat-label">Interests</span>
+          <span className="stat-value">{totalInterests} Topics</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">Recommendations</span>
+          <span className="stat-value">{itemsCount} Items</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">Avg. Match</span>
+          <span className="stat-value">{avgMatchPercent}%</span>
+        </div>
+      </div>
 
       {/* Executive Summary Prose Section */}
       <section className="summary-prose-card">
@@ -286,11 +346,24 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
           <div className="items-grid">
             {itemsToDisplay.map((item) => {
               const relevancePercent = Math.round(item.relevance_score * 100);
+              const relativeTime = formatRelativeTime(item.created_at);
 
               return (
-                <article key={item.id} className="digest-item-card">
-                  <div className="item-card-top">
+                <article
+                  key={item.id}
+                  className={`digest-item-card ${
+                    savedItemIds[item.activity_item_id] ? "card-is-saved" : ""
+                  }`}
+                >
+                  <div className="item-card-header-row">
                     <span className="rank-pill">#{item.rank_position}</span>
+                    <h3 className="item-title">{item.title}</h3>
+                  </div>
+
+                  <div className="item-meta-row">
+                    {relativeTime && (
+                      <span className="time-badge">🕒 {relativeTime}</span>
+                    )}
                     <div className="relevance-meter">
                       <div
                         className="relevance-fill"
@@ -300,47 +373,12 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
                     </div>
                   </div>
 
-                  <h3 className="item-title">{item.title}</h3>
                   <p className="item-content">{item.content}</p>
 
                   {/* Core Transparency Explanation Badge */}
                   <div className="transparency-banner">
                     <span className="explanation-icon">💡</span>
                     <span className="explanation-text">{item.explanation_text}</span>
-                  </div>
-
-                  {/* Feedback Buttons Row */}
-                  <div className="item-feedback-row">
-                    <button
-                      type="button"
-                      className={`feedback-btn feedback-useful ${
-                        feedbackState[item.activity_item_id] === "useful" ? "active" : ""
-                      }`}
-                      onClick={() => handleFeedbackClick(item.activity_item_id, "useful")}
-                      title="Mark as Useful"
-                    >
-                      👍 Useful
-                    </button>
-                    <button
-                      type="button"
-                      className={`feedback-btn feedback-not-useful ${
-                        feedbackState[item.activity_item_id] === "not_useful" ? "active" : ""
-                      }`}
-                      onClick={() => handleFeedbackClick(item.activity_item_id, "not_useful")}
-                      title="Mark as Not Useful"
-                    >
-                      👎 Not Useful
-                    </button>
-                    <button
-                      type="button"
-                      className={`feedback-btn feedback-not-interested ${
-                        feedbackState[item.activity_item_id] === "not_interested" ? "active" : ""
-                      }`}
-                      onClick={() => handleFeedbackClick(item.activity_item_id, "not_interested")}
-                      title="Mark as Not Interested"
-                    >
-                      🚫 Not Interested
-                    </button>
                   </div>
 
                   {item.category_tags && item.category_tags.length > 0 && (
@@ -352,6 +390,57 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
                       ))}
                     </div>
                   )}
+
+                  {/* Feedback Buttons & Save Action Row */}
+                  <div className="item-actions-row">
+                    <div className="item-feedback-row">
+                      <button
+                        type="button"
+                        className={`feedback-btn feedback-useful ${
+                          feedbackState[item.activity_item_id] === "useful" ? "active" : ""
+                        }`}
+                        onClick={() => handleFeedbackClick(item.activity_item_id, "useful")}
+                        title="Mark as Useful"
+                      >
+                        👍 Useful
+                      </button>
+                      <button
+                        type="button"
+                        className={`feedback-btn feedback-not-useful ${
+                          feedbackState[item.activity_item_id] === "not_useful" ? "active" : ""
+                        }`}
+                        onClick={() => handleFeedbackClick(item.activity_item_id, "not_useful")}
+                        title="Mark as Not Useful"
+                      >
+                        👎 Not Useful
+                      </button>
+                      <button
+                        type="button"
+                        className={`feedback-btn feedback-not-interested ${
+                          feedbackState[item.activity_item_id] === "not_interested" ? "active" : ""
+                        }`}
+                        onClick={() => handleFeedbackClick(item.activity_item_id, "not_interested")}
+                        title="Mark as Not Interested"
+                      >
+                        🚫 Not Interested
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      className={`btn-save-bookmark ${
+                        savedItemIds[item.activity_item_id] ? "saved" : ""
+                      }`}
+                      onClick={() => toggleSaveItem(item.activity_item_id)}
+                      title={
+                        savedItemIds[item.activity_item_id]
+                          ? "Remove from Saved"
+                          : "Save for later"
+                      }
+                    >
+                      {savedItemIds[item.activity_item_id] ? "🔖 Saved" : "🔖 Save"}
+                    </button>
+                  </div>
                 </article>
               );
             })}

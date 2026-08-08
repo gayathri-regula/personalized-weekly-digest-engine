@@ -149,6 +149,7 @@ def rank_items_for_user(
     top_n: int = 5,
     now: datetime | None = None,
     boost_tag: Optional[str] = None,
+    diversity_boost: bool = False,
 ) -> List[RankedItem]:
     """Score and rank activity items for a user deterministically.
 
@@ -158,6 +159,8 @@ def rank_items_for_user(
         top_n: Maximum number of top items to return (default 5).
         now: Optional reference scoring time.
         boost_tag: Optional taxonomy tag string to temporarily boost matching items.
+        diversity_boost: If True, post-process top_n selection to avoid selecting
+            more than 2 items sharing the exact same primary category tag when alternatives exist.
 
     Returns:
         List[RankedItem]: Ranked items sorted descending by relevance_score,
@@ -174,12 +177,13 @@ def rank_items_for_user(
     else:
         effective_interests = list(user_interests)
 
-    scored_items: List[Tuple[float, str, datetime, str, str]] = []
+    scored_items: List[Tuple[float, str, datetime, str, str, str]] = []
 
     for item in items:
         item_id = str(_get_attr(item, "id"))
         item_tags = _get_attr(item, "category_tags", []) or []
         item_tags_set = set(item_tags)
+        primary_tag = item_tags[0] if item_tags else ""
         created_at = _get_attr(item, "created_at")
         engagement = _get_attr(item, "engagement_metadata", {}) or {}
 
@@ -223,17 +227,38 @@ def rank_items_for_user(
             explanation = derive_explanation(real_matching_tags)
 
         scored_items.append(
-            (bounded_score, item_id, created_at, explanation, item_id)
+            (bounded_score, item_id, created_at, explanation, item_id, primary_tag)
         )
 
     # Sort descending by relevance score; use created_at and item_id as tie-breakers
     scored_items.sort(key=lambda x: (x[0], x[2], x[1]), reverse=True)
 
     # Select top_n items
-    top_items = scored_items[:top_n]
+    if diversity_boost:
+        top_items = []
+        tag_counts: Dict[str, int] = {}
+        skipped_items = []
+        for entry in scored_items:
+            ptag = entry[5]
+            current_count = tag_counts.get(ptag, 0) if ptag else 0
+            if ptag and current_count >= 2:
+                skipped_items.append(entry)
+            else:
+                top_items.append(entry)
+                if ptag:
+                    tag_counts[ptag] = current_count + 1
+                if len(top_items) == top_n:
+                    break
+        if len(top_items) < top_n:
+            for entry in skipped_items:
+                top_items.append(entry)
+                if len(top_items) == top_n:
+                    break
+    else:
+        top_items = scored_items[:top_n]
 
     results: List[RankedItem] = []
-    for rank_idx, (score, item_id, _, explanation, _) in enumerate(top_items, start=1):
+    for rank_idx, (score, item_id, _, explanation, _, _) in enumerate(top_items, start=1):
         results.append(
             RankedItem(
                 activity_item_id=item_id,

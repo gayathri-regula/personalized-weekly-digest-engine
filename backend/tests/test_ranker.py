@@ -192,3 +192,55 @@ def test_boost_tag_default_none_preserves_behavior():
     assert r1[0].relevance_score == r2[0].relevance_score
     assert r1[0].explanation_text == r2[0].explanation_text
 
+
+def test_diversity_boost_default_false_identical_behavior():
+    """Test that diversity_boost=False produces identical output to calling rank_items_for_user with defaults."""
+    user = {"id": "user_1", "interest_tags": ["AI", "Python"]}
+    now = datetime(2026, 7, 25, 12, 0, 0, tzinfo=timezone.utc)
+    items = [
+        {
+            "id": f"item_{i}",
+            "title": f"Title {i}",
+            "content": "Content",
+            "category_tags": ["AI"],
+            "created_at": now,
+            "engagement_metadata": {"views": 100, "likes": 10},
+        }
+        for i in range(5)
+    ]
+    r_default = rank_items_for_user(user, items, top_n=3, now=now)
+    r_false = rank_items_for_user(user, items, top_n=3, now=now, diversity_boost=False)
+    assert [i.activity_item_id for i in r_default] == [i.activity_item_id for i in r_false]
+
+
+def test_diversity_boost_caps_primary_tag_at_two():
+    """Test that diversity_boost=True caps primary tag at 2 items when items with alternative tags exist."""
+    user = {"id": "user_1", "interest_tags": ["AI", "Security", "Python"]}
+    now = datetime(2026, 7, 25, 12, 0, 0, tzinfo=timezone.utc)
+    items = [
+        {
+            "id": "ai_1", "title": "AI 1", "content": "c", "category_tags": ["AI"],
+            "created_at": now, "engagement_metadata": {"views": 500, "likes": 50}
+        },
+        {
+            "id": "ai_2", "title": "AI 2", "content": "c", "category_tags": ["AI"],
+            "created_at": now, "engagement_metadata": {"views": 400, "likes": 40}
+        },
+        {
+            "id": "ai_3", "title": "AI 3", "content": "c", "category_tags": ["AI"],
+            "created_at": now, "engagement_metadata": {"views": 300, "likes": 30}
+        },
+        {
+            "id": "sec_1", "title": "Sec 1", "content": "c", "category_tags": ["Security"],
+            "created_at": now, "engagement_metadata": {"views": 250, "likes": 25}
+        },
+    ]
+
+    # Without diversity boost, top 3 items are ai_2, ai_1, ai_3 (all AI)
+    standard_res = rank_items_for_user(user, items, top_n=3, now=now, diversity_boost=False)
+    assert [i.activity_item_id for i in standard_res] == ["ai_2", "ai_1", "ai_3"]
+
+    # With diversity boost, third item selected is sec_1 instead of ai_3
+    diverse_res = rank_items_for_user(user, items, top_n=3, now=now, diversity_boost=True)
+    assert [i.activity_item_id for i in diverse_res] == ["ai_2", "ai_1", "sec_1"]
+

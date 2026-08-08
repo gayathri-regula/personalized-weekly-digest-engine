@@ -27,6 +27,9 @@ class DigestItemResponse(BaseModel):
     feedback_type: Optional[str] = Field(
         default=None, description="User feedback type for this item if submitted"
     )
+    created_at: Optional[datetime] = Field(
+        default=None, description="Item creation timestamp"
+    )
 
     model_config = ConfigDict(from_attributes=True)
 

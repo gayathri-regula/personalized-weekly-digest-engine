@@ -18,16 +18,18 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
   variant = "primary",
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [mode, setMode] = useState<"standard" | "diverse">("standard");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<boolean>(false);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (selectedMode: "standard" | "diverse" = mode) => {
     setLoading(true);
     setErrorMsg(null);
     setSuccessToast(false);
 
     try {
-      const result = await generateDigest(userId);
+      const isDiverse = selectedMode === "diverse";
+      const result = await generateDigest(userId, isDiverse);
       onSuccess(result);
       setSuccessToast(true);
       setTimeout(() => {
@@ -49,38 +51,53 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
 
   return (
     <div className="generate-btn-wrapper">
-      <button
-        onClick={handleGenerate}
-        disabled={loading || !userId}
-        className={`btn-generate ${variant === "secondary" ? "btn-secondary" : "btn-primary"} ${
-          successToast ? "btn-success-flash" : ""
-        }`}
-      >
-        {loading ? (
-          <>
-            <span className="spinner-icon-sm"></span>
-            Analyzing activity & generating prose...
-          </>
-        ) : (
-          <>
-            <svg
-              className="sparkle-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-            </svg>
-            {label}
-          </>
-        )}
-      </button>
+      <div className="regenerate-control-group">
+        <select
+          value={mode}
+          onChange={(e) => setMode(e.target.value as "standard" | "diverse")}
+          disabled={loading || !userId}
+          className="mode-select"
+          aria-label="Regeneration Mode"
+        >
+          <option value="standard">Standard</option>
+          <option value="diverse">More Diverse</option>
+        </select>
+
+        <button
+          onClick={() => handleGenerate(mode)}
+          disabled={loading || !userId}
+          className={`btn-generate ${variant === "secondary" ? "btn-secondary" : "btn-primary"} ${
+            successToast ? "btn-success-flash" : ""
+          }`}
+        >
+          {loading ? (
+            <>
+              <span className="spinner-icon-sm"></span>
+              Generating...
+            </>
+          ) : (
+            <>
+              <svg
+                className="sparkle-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+              </svg>
+              {label}
+            </>
+          )}
+        </button>
+      </div>
 
       {successToast && (
         <div className="generate-success-toast">
           <span className="toast-icon">✓</span>
-          <span>Digest regenerated successfully!</span>
+          <span>
+            Digest regenerated successfully ({mode === "diverse" ? "More Diverse" : "Standard"})!
+          </span>
         </div>
       )}
 
