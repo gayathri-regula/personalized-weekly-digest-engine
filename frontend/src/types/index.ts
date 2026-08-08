@@ -21,6 +21,14 @@ export interface CreateUserPayload {
   interest_tags: string[];
 }
 
+export interface FeedbackResponse {
+  id: string;
+  user_id: string;
+  activity_item_id: string;
+  feedback_type: string;
+  created_at: string;
+}
+
 export interface DigestItem {
   id: string;
   activity_item_id: string;
@@ -30,6 +38,7 @@ export interface DigestItem {
   relevance_score: number;
   explanation_text: string;
   rank_position: number;
+  feedback_type?: string | null;
 }
 
 export interface AISuggestion {

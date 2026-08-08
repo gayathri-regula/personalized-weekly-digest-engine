@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { boostDigest, getDigest } from "../api/client";
+import { boostDigest, getDigest, submitFeedback } from "../api/client";
 import { Digest, DigestItem, User } from "../types";
 import { GenerateButton } from "./GenerateButton";
 
@@ -18,6 +18,9 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
   const [activeBoostTag, setActiveBoostTag] = useState<string | null>(null);
   const [boostingTag, setBoostingTag] = useState<string | null>(null);
   const [boostError, setBoostError] = useState<string | null>(null);
+
+  // Local feedback state map: activityItemId -> feedback_type ("useful" | "not_useful" | "not_interested")
+  const [feedbackState, setFeedbackState] = useState<Record<string, string>>({});
 
   useEffect(() => {
     // Reset boost state when user changes
@@ -101,6 +104,40 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
     setActiveBoostTag(null);
     setBoostedItems(null);
     setBoostError(null);
+  };
+
+  // Synchronize local feedbackState when digest items load or update
+  useEffect(() => {
+    if (digest) {
+      const initialMap: Record<string, string> = {};
+      digest.items.forEach((item) => {
+        if (item.feedback_type) {
+          initialMap[item.activity_item_id] = item.feedback_type;
+        }
+      });
+      setFeedbackState(initialMap);
+    } else {
+      setFeedbackState({});
+    }
+  }, [digest]);
+
+  const handleFeedbackClick = async (
+    activityItemId: string,
+    selectedType: string
+  ) => {
+    if (!user) return;
+
+    // Optimistically update local UI state
+    setFeedbackState((prev) => ({
+      ...prev,
+      [activityItemId]: selectedType,
+    }));
+
+    try {
+      await submitFeedback(user.id, activityItemId, selectedType);
+    } catch (err: unknown) {
+      console.error("Failed to persist feedback:", err);
+    }
   };
 
   if (!user) {
@@ -270,6 +307,40 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
                   <div className="transparency-banner">
                     <span className="explanation-icon">💡</span>
                     <span className="explanation-text">{item.explanation_text}</span>
+                  </div>
+
+                  {/* Feedback Buttons Row */}
+                  <div className="item-feedback-row">
+                    <button
+                      type="button"
+                      className={`feedback-btn feedback-useful ${
+                        feedbackState[item.activity_item_id] === "useful" ? "active" : ""
+                      }`}
+                      onClick={() => handleFeedbackClick(item.activity_item_id, "useful")}
+                      title="Mark as Useful"
+                    >
+                      👍 Useful
+                    </button>
+                    <button
+                      type="button"
+                      className={`feedback-btn feedback-not-useful ${
+                        feedbackState[item.activity_item_id] === "not_useful" ? "active" : ""
+                      }`}
+                      onClick={() => handleFeedbackClick(item.activity_item_id, "not_useful")}
+                      title="Mark as Not Useful"
+                    >
+                      👎 Not Useful
+                    </button>
+                    <button
+                      type="button"
+                      className={`feedback-btn feedback-not-interested ${
+                        feedbackState[item.activity_item_id] === "not_interested" ? "active" : ""
+                      }`}
+                      onClick={() => handleFeedbackClick(item.activity_item_id, "not_interested")}
+                      title="Mark as Not Interested"
+                    >
+                      🚫 Not Interested
+                    </button>
                   </div>
 
                   {item.category_tags && item.category_tags.length > 0 && (

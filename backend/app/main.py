@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.routers.digest import router as digest_router
+from app.routers.feedback import router as feedback_router
 from app.routers.interests import router as interests_router
 from app.routers.users import router as users_router
 
@@ -36,6 +37,7 @@ def create_app() -> FastAPI:
 
     # Register API routers with /api prefix
     application.include_router(digest_router, prefix="/api")
+    application.include_router(feedback_router, prefix="/api")
     application.include_router(interests_router, prefix="/api")
     application.include_router(users_router, prefix="/api")
 

@@ -1,6 +1,7 @@
 import {
   BoostedDigest,
   Digest,
+  FeedbackResponse,
   InterestsResponse,
   User,
   UsersListResponse,
@@ -246,6 +247,47 @@ export async function boostDigest(
     }
     throw new ApiError(
       "Backend server unreachable during digest boost. Please try again.",
+      0
+    );
+  }
+}
+
+/**
+ * Submit explicit user feedback rating for a digest activity item.
+ */
+export async function submitFeedback(
+  userId: string,
+  itemId: string,
+  feedbackType: string
+): Promise<FeedbackResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/feedback/${userId}/${itemId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ feedback_type: feedbackType }),
+      }
+    );
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(
+        `Failed to submit feedback: ${detail}`,
+        response.status
+      );
+    }
+    const data: FeedbackResponse = await response.json();
+    return data;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Backend server unreachable during feedback submission.",
       0
     );
   }

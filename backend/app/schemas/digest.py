@@ -24,6 +24,9 @@ class DigestItemResponse(BaseModel):
     rank_position: int = Field(
         ..., description="1-indexed rank position in the digest"
     )
+    feedback_type: Optional[str] = Field(
+        default=None, description="User feedback type for this item if submitted"
+    )
 
     model_config = ConfigDict(from_attributes=True)
 

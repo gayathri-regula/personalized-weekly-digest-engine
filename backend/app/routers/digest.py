@@ -11,6 +11,7 @@ from app.db.session import get_db
 from app.models.activity_item import ActivityItem
 from app.models.digest import Digest
 from app.models.digest_item import DigestItem
+from app.models.feedback import ItemFeedback
 from app.models.user import User
 from app.schemas.digest import (
     AISuggestion,
@@ -61,6 +62,14 @@ async def boost_user_digest(
         user=user, items=items, top_n=5, now=ref_now, boost_tag=boost_in.tag
     )
 
+    # 4. Fetch existing feedback for user
+    fb_result = await db.execute(
+        select(ItemFeedback).where(ItemFeedback.user_id == user_id)
+    )
+    feedback_map = {
+        fb.activity_item_id: fb.feedback_type for fb in fb_result.scalars().all()
+    }
+
     response_items = []
     for r in ranked_items:
         act_item = items_by_id.get(r.activity_item_id)
@@ -75,6 +84,7 @@ async def boost_user_digest(
                 relevance_score=r.relevance_score,
                 explanation_text=r.explanation_text,
                 rank_position=r.rank_position,
+                feedback_type=feedback_map.get(r.activity_item_id),
             )
         )
 
@@ -169,6 +179,14 @@ async def generate_user_digest(
         )
         db.add(digest_obj)
 
+    # Fetch existing feedback for user
+    fb_result = await db.execute(
+        select(ItemFeedback).where(ItemFeedback.user_id == user_id)
+    )
+    feedback_map = {
+        fb.activity_item_id: fb.feedback_type for fb in fb_result.scalars().all()
+    }
+
     # 7. Insert new DigestItem rows
     response_items = []
     for idx, (r, detail) in enumerate(zip(ranked_items, joined_details), start=1):
@@ -193,6 +211,7 @@ async def generate_user_digest(
                 relevance_score=r.relevance_score,
                 explanation_text=r.explanation_text,
                 rank_position=r.rank_position,
+                feedback_type=feedback_map.get(r.activity_item_id),
             )
         )
 
@@ -258,6 +277,14 @@ async def get_latest_user_digest(
     else:
         act_map = {}
 
+    # Fetch existing feedback for user
+    fb_result = await db.execute(
+        select(ItemFeedback).where(ItemFeedback.user_id == user_id)
+    )
+    feedback_map = {
+        fb.activity_item_id: fb.feedback_type for fb in fb_result.scalars().all()
+    }
+
     response_items = []
     for di in ditems:
         act = act_map.get(di.activity_item_id)
@@ -271,6 +298,7 @@ async def get_latest_user_digest(
                 relevance_score=di.relevance_score,
                 explanation_text=di.explanation_text,
                 rank_position=di.rank_position,
+                feedback_type=feedback_map.get(di.activity_item_id),
             )
         )
 
