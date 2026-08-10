@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { boostDigest, getDigest, submitFeedback } from "../api/client";
 import { Digest, DigestItem, User } from "../types";
+import { groupDigestItems } from "../utils/groupDigestItems";
 import { GenerateButton } from "./GenerateButton";
 
 interface DigestViewProps {
@@ -244,6 +245,7 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
             100
         )
       : 0;
+  const sections = groupDigestItems(itemsToDisplay);
 
   return (
     <div className="digest-view-container">
@@ -343,107 +345,122 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
             <p>No highly relevant activity updates were found for your interest topics this week.</p>
           </div>
         ) : (
-          <div className="items-grid">
-            {itemsToDisplay.map((item) => {
-              const relevancePercent = Math.round(item.relevance_score * 100);
-              const relativeTime = formatRelativeTime(item.created_at);
+          <div className="digest-sections-container">
+            {sections.map((section) => (
+              <div key={section.id} className="digest-section-group">
+                <div className="digest-section-header">
+                  <h3 className="digest-section-title">
+                    {section.id === "top-picks" ? "⭐ " : "📌 "}
+                    {section.title}
+                  </h3>
+                  <span className="digest-section-count">
+                    {section.items.length} {section.items.length === 1 ? "Item" : "Items"}
+                  </span>
+                </div>
+                <div className="items-grid">
+                  {section.items.map((item) => {
+                    const relevancePercent = Math.round(item.relevance_score * 100);
+                    const relativeTime = formatRelativeTime(item.created_at);
 
-              return (
-                <article
-                  key={item.id}
-                  className={`digest-item-card ${
-                    savedItemIds[item.activity_item_id] ? "card-is-saved" : ""
-                  }`}
-                >
-                  <div className="item-card-header-row">
-                    <span className="rank-pill">#{item.rank_position}</span>
-                    <h3 className="item-title">{item.title}</h3>
-                  </div>
-
-                  <div className="item-meta-row">
-                    {relativeTime && (
-                      <span className="time-badge">🕒 {relativeTime}</span>
-                    )}
-                    <div className="relevance-meter">
-                      <div
-                        className="relevance-fill"
-                        style={{ width: `${relevancePercent}%` }}
-                      ></div>
-                      <span className="relevance-label">{relevancePercent}% Match</span>
-                    </div>
-                  </div>
-
-                  <p className="item-content">{item.content}</p>
-
-                  {/* Core Transparency Explanation Badge */}
-                  <div className="transparency-banner">
-                    <span className="explanation-icon">💡</span>
-                    <span className="explanation-text">{item.explanation_text}</span>
-                  </div>
-
-                  {item.category_tags && item.category_tags.length > 0 && (
-                    <div className="item-tags-row">
-                      {item.category_tags.map((tag) => (
-                        <span key={tag} className="tag-chip">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Feedback Buttons & Save Action Row */}
-                  <div className="item-actions-row">
-                    <div className="item-feedback-row">
-                      <button
-                        type="button"
-                        className={`feedback-btn feedback-useful ${
-                          feedbackState[item.activity_item_id] === "useful" ? "active" : ""
+                    return (
+                      <article
+                        key={item.id}
+                        className={`digest-item-card ${
+                          savedItemIds[item.activity_item_id] ? "card-is-saved" : ""
                         }`}
-                        onClick={() => handleFeedbackClick(item.activity_item_id, "useful")}
-                        title="Mark as Useful"
                       >
-                        👍 Useful
-                      </button>
-                      <button
-                        type="button"
-                        className={`feedback-btn feedback-not-useful ${
-                          feedbackState[item.activity_item_id] === "not_useful" ? "active" : ""
-                        }`}
-                        onClick={() => handleFeedbackClick(item.activity_item_id, "not_useful")}
-                        title="Mark as Not Useful"
-                      >
-                        👎 Not Useful
-                      </button>
-                      <button
-                        type="button"
-                        className={`feedback-btn feedback-not-interested ${
-                          feedbackState[item.activity_item_id] === "not_interested" ? "active" : ""
-                        }`}
-                        onClick={() => handleFeedbackClick(item.activity_item_id, "not_interested")}
-                        title="Mark as Not Interested"
-                      >
-                        🚫 Not Interested
-                      </button>
-                    </div>
+                        <div className="item-card-header-row">
+                          <span className="rank-pill">#{item.rank_position}</span>
+                          <h3 className="item-title">{item.title}</h3>
+                        </div>
 
-                    <button
-                      type="button"
-                      className={`btn-save-bookmark ${
-                        savedItemIds[item.activity_item_id] ? "saved" : ""
-                      }`}
-                      onClick={() => toggleSaveItem(item.activity_item_id)}
-                      title={
-                        savedItemIds[item.activity_item_id]
-                          ? "Remove from Saved"
-                          : "Save for later"
-                      }
-                    >
-                      {savedItemIds[item.activity_item_id] ? "🔖 Saved" : "🔖 Save"}
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
+                        <div className="item-meta-row">
+                          {relativeTime && (
+                            <span className="time-badge">🕒 {relativeTime}</span>
+                          )}
+                          <div className="relevance-meter">
+                            <div
+                              className="relevance-fill"
+                              style={{ width: `${relevancePercent}%` }}
+                            ></div>
+                            <span className="relevance-label">{relevancePercent}% Match</span>
+                          </div>
+                        </div>
+
+                        <p className="item-content">{item.content}</p>
+
+                        {/* Core Transparency Explanation Badge */}
+                        <div className="transparency-banner">
+                          <span className="explanation-icon">💡</span>
+                          <span className="explanation-text">{item.explanation_text}</span>
+                        </div>
+
+                        {item.category_tags && item.category_tags.length > 0 && (
+                          <div className="item-tags-row">
+                            {item.category_tags.map((tag) => (
+                              <span key={tag} className="tag-chip">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Feedback Buttons & Save Action Row */}
+                        <div className="item-actions-row">
+                          <div className="item-feedback-row">
+                            <button
+                              type="button"
+                              className={`feedback-btn feedback-useful ${
+                                feedbackState[item.activity_item_id] === "useful" ? "active" : ""
+                              }`}
+                              onClick={() => handleFeedbackClick(item.activity_item_id, "useful")}
+                              title="Mark as Useful"
+                            >
+                              👍 Useful
+                            </button>
+                            <button
+                              type="button"
+                              className={`feedback-btn feedback-not-useful ${
+                                feedbackState[item.activity_item_id] === "not_useful" ? "active" : ""
+                              }`}
+                              onClick={() => handleFeedbackClick(item.activity_item_id, "not_useful")}
+                              title="Mark as Not Useful"
+                            >
+                              👎 Not Useful
+                            </button>
+                            <button
+                              type="button"
+                              className={`feedback-btn feedback-not-interested ${
+                                feedbackState[item.activity_item_id] === "not_interested" ? "active" : ""
+                              }`}
+                              onClick={() => handleFeedbackClick(item.activity_item_id, "not_interested")}
+                              title="Mark as Not Interested"
+                            >
+                              🚫 Not Interested
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={`btn-save-bookmark ${
+                              savedItemIds[item.activity_item_id] ? "saved" : ""
+                            }`}
+                            onClick={() => toggleSaveItem(item.activity_item_id)}
+                            title={
+                              savedItemIds[item.activity_item_id]
+                                ? "Remove from Saved"
+                                : "Save for later"
+                            }
+                          >
+                            {savedItemIds[item.activity_item_id] ? "🔖 Saved" : "🔖 Save"}
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>

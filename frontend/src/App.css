@@ -1773,3 +1773,46 @@
   box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
 }
 
+/* Digest Sections Grouping Styles */
+.digest-sections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.digest-section-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.digest-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.digest-section-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e1b4b;
+  letter-spacing: -0.015em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.digest-section-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4338ca;
+  background: rgba(79, 70, 229, 0.08);
+  border: 1px solid rgba(79, 70, 229, 0.15);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+}
+
+
