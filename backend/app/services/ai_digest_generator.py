@@ -20,55 +20,175 @@ logger = logging.getLogger(__name__)
 DEFAULT_CLAUDE_MODEL: str = "claude-sonnet-4-6"
 DEFAULT_TIMEOUT_SECONDS: float = 15.0
 
-FALLBACK_ITEM_TEMPLATES: Dict[str, Dict[str, str]] = {
-    "AI": {
-        "title": "Architecting Autonomous Agent Systems with Deterministic Guardrails",
-        "content": "Explore modern patterns for building reliable multi-agent workflows, combining state machine routing with LLM reasoning pipelines.",
-    },
-    "Machine Learning": {
-        "title": "Optimizing Model Inference Latency via Quantization & Pruning",
-        "content": "A comprehensive benchmark comparing FP16, INT8, and INT4 quantization strategies for low-latency production deployments.",
-    },
-    "Python": {
-        "title": "High-Performance Asynchronous Microservices with FastAPI & AsyncIO",
-        "content": "Practical strategies for managing connection pools, concurrency limits, and async ORM pipelines under heavy throughput.",
-    },
-    "JavaScript": {
-        "title": "Mastering Server Components & Modern React Rendering Pipelines",
-        "content": "Deep dive into server-driven UI architecture, streaming SSR, and zero-bundle-size client components.",
-    },
-    "Cloud": {
-        "title": "Multi-Region Cloud Resilience & Automated Disaster Recovery Blueprints",
-        "content": "Best practices for implementing active-active database replication and automated failover across cloud regions.",
-    },
-    "DevOps": {
-        "title": "GitOps Infrastructure Management with Automated Drift Detection",
-        "content": "Streamlining Kubernetes cluster deployments and infrastructure provisioning using declarative GitOps pipelines.",
-    },
-    "Data Science": {
-        "title": "Real-Time Feature Engineering Pipelines for Production ML Systems",
-        "content": "Building scalable feature stores to synchronize offline training data with online real-time inference tables.",
-    },
-    "Mobile Development": {
-        "title": "Cross-Platform Performance Optimization & Native Bridge Benchmarks",
-        "content": "Evaluating memory footprints, render performance, and native module bindings across modern mobile frameworks.",
-    },
-    "Security": {
-        "title": "Zero-Trust API Security Architecture & OAuth2 Hardening Guide",
-        "content": "Implementing fine-grained authorization policies, token introspection, and proactive threat detection for microservices.",
-    },
-    "UI/UX Design": {
-        "title": "Designing Accessible & Micro-Animated Component Libraries",
-        "content": "Key design tokens, contrast compliance standards, and fluid motion guidelines for modern web design systems.",
-    },
-    "Backend Engineering": {
-        "title": "Event-Driven Microservices Architecture & Message Bus Patterns",
-        "content": "Designing resilient pub/sub event streams, idempotent consumer handlers, and dead-letter queue recovery mechanisms.",
-    },
-    "Open Source": {
-        "title": "Building Sustainable Open-Source Community Tooling & Governance",
-        "content": "Insights into maintainer workflows, release automation, and collaborative governance models for open projects.",
-    },
+FALLBACK_ITEM_TEMPLATES: Dict[str, List[Dict[str, str]]] = {
+    "AI": [
+        {
+            "title": "Architecting Autonomous Agent Systems with Deterministic Guardrails",
+            "content": "Explore modern patterns for building reliable multi-agent workflows, combining state machine routing with LLM reasoning pipelines.",
+        },
+        {
+            "title": "Scaling LLM Inference Infrastructure with Speculative Decoding",
+            "content": "A technical guide to optimizing auto-regressive model throughput using draft models and parallel token verification.",
+        },
+        {
+            "title": "Retrieval-Augmented Generation at Scale: Vector Indexing & Reranking",
+            "content": "Deep dive into hybrid search strategies, dense embeddings, and cross-encoder reranking for production knowledge bases.",
+        },
+    ],
+    "Machine Learning": [
+        {
+            "title": "Optimizing Model Inference Latency via Quantization & Pruning",
+            "content": "A comprehensive benchmark comparing FP16, INT8, and INT4 quantization strategies for low-latency production deployments.",
+        },
+        {
+            "title": "Distributed Training Strategies for Large-Scale Deep Learning Models",
+            "content": "Analyzing data parallelism, pipeline parallelism, and DeepSpeed ZeRO memory optimization strategies across GPU clusters.",
+        },
+        {
+            "title": "Continuous Model Monitoring & Automated Drift Detection in MLOps",
+            "content": "Best practices for tracking feature store drift, concept drift, and performance degradation in live prediction services.",
+        },
+    ],
+    "Python": [
+        {
+            "title": "High-Performance Asynchronous Microservices with FastAPI & AsyncIO",
+            "content": "Practical strategies for managing connection pools, concurrency limits, and async ORM pipelines under heavy throughput.",
+        },
+        {
+            "title": "Advanced Memory Management & Garbage Collection in Python 3.12+",
+            "content": "Understanding reference counting, cyclic GC tweaks, and object layout optimizations for memory-intensive applications.",
+        },
+        {
+            "title": "Modern Python Packaging & Dependency Resolution with UV & Hatch",
+            "content": "Streamlining build pipelines, lockfile generation, and virtual environment isolation in enterprise Python codebases.",
+        },
+    ],
+    "JavaScript": [
+        {
+            "title": "Mastering Server Components & Modern React Rendering Pipelines",
+            "content": "Deep dive into server-driven UI architecture, streaming SSR, and zero-bundle-size client components.",
+        },
+        {
+            "title": "Optimizing Web Vitals & Hydration Performance in Next.js Apps",
+            "content": "Tactics for reducing main-thread block time, deferring non-critical scripts, and eliminating layout shifts in complex UI.",
+        },
+        {
+            "title": "Event-Driven Node.js Architecture & Worker Thread Concurrency",
+            "content": "Leveraging event loops, libuv worker pools, and shared memory buffers for CPU-intensive JavaScript tasks.",
+        },
+    ],
+    "Cloud": [
+        {
+            "title": "Multi-Region Cloud Resilience & Automated Disaster Recovery Blueprints",
+            "content": "Best practices for implementing active-active database replication and automated failover across cloud regions.",
+        },
+        {
+            "title": "Serverless Architecture Optimization & Cold Start Reduction Techniques",
+            "content": "Strategies for fine-tuning provisioned concurrency, memory allocation, and lightweight runtimes in serverless environments.",
+        },
+        {
+            "title": "Zero-Trust Infrastructure Provisioning with Terraform & OpenTofu",
+            "content": "Managing immutable infrastructure, state file security, and modular policy-as-code enforcement in multi-cloud setups.",
+        },
+    ],
+    "DevOps": [
+        {
+            "title": "GitOps Infrastructure Management with Automated Drift Detection",
+            "content": "Streamlining Kubernetes cluster deployments and infrastructure provisioning using declarative GitOps pipelines.",
+        },
+        {
+            "title": "Zero-Downtime Deployment Strategies with Canary & Blue-Green Rollouts",
+            "content": "Implementing automated health checks, progressive traffic splitting, and instant rollback mechanisms in CI/CD pipelines.",
+        },
+        {
+            "title": "Comprehensive Container Security & Image Vulnerability Scanning",
+            "content": "Hardening Dockerfiles, enforcing non-root runtime environments, and automating container security gates in build pipelines.",
+        },
+    ],
+    "Data Science": [
+        {
+            "title": "Real-Time Feature Engineering Pipelines for Production ML Systems",
+            "content": "Building scalable feature stores to synchronize offline training data with online real-time inference tables.",
+        },
+        {
+            "title": "Scalable Analytical Query Engine Design with Apache Arrow & Polars",
+            "content": "Leveraging columnar memory formats, zero-copy serialization, and multi-core parallelism for massive datasets.",
+        },
+        {
+            "title": "Automated Data Quality Validation & Anomaly Detection Frameworks",
+            "content": "Enforcing schema contracts, statistical distribution checks, and automated alerting across distributed data pipelines.",
+        },
+    ],
+    "Mobile Development": [
+        {
+            "title": "Cross-Platform Performance Optimization & Native Bridge Benchmarks",
+            "content": "Evaluating memory footprints, render performance, and native module bindings across modern mobile frameworks.",
+        },
+        {
+            "title": "Offline-First Mobile Synchronization Architecture with Local Databases",
+            "content": "Designing conflict-free replicated data types (CRDTs) and background sync workers for resilient mobile UX.",
+        },
+        {
+            "title": "Mobile App Battery & CPU Profiling for High-Frequency Render Loops",
+            "content": "Identifying thread starvation, unneeded layout passes, and resource leaks using native mobile diagnostic tools.",
+        },
+    ],
+    "Security": [
+        {
+            "title": "Zero-Trust API Security Architecture & OAuth2 Hardening Guide",
+            "content": "Implementing fine-grained authorization policies, token introspection, and proactive threat detection for microservices.",
+        },
+        {
+            "title": "Automated Software Supply Chain Security & Dependency Attestation",
+            "content": "Securing build artifact provenance, generating SBOMs, and preventing dependency confusion attacks.",
+        },
+        {
+            "title": "Application-Layer Encryption & Key Rotation Best Practices",
+            "content": "Implementing envelope encryption, HSM key management, and zero-downtime cryptographic key rotation schemas.",
+        },
+    ],
+    "UI/UX Design": [
+        {
+            "title": "Designing Accessible & Micro-Animated Component Libraries",
+            "content": "Key design tokens, contrast compliance standards, and fluid motion guidelines for modern web design systems.",
+        },
+        {
+            "title": "Design System Token Management & Cross-Platform Synchronization",
+            "content": "Automating design token propagation from Figma styles to web, iOS, and Android theme configurations.",
+        },
+        {
+            "title": "User Cognitive Load Reduction & Micro-Interaction Design Patterns",
+            "content": "Crafting progressive disclosure interfaces, contextual feedback, and intuitive navigation structures.",
+        },
+    ],
+    "Backend Engineering": [
+        {
+            "title": "Event-Driven Microservices Architecture & Message Bus Patterns",
+            "content": "Designing resilient pub/sub event streams, idempotent consumer handlers, and dead-letter queue recovery mechanisms.",
+        },
+        {
+            "title": "High-Throughput Database Partitioning & Sharding Strategies",
+            "content": "Optimizing database schemas for horizontal scaling, distributed transactions, and query routing across shards.",
+        },
+        {
+            "title": "API Gateway Rate Limiting & Distributed Throttling Architectures",
+            "content": "Implementing token bucket algorithms, Redis-backed sliding windows, and graceful client degradation during load spikes.",
+        },
+    ],
+    "Open Source": [
+        {
+            "title": "Building Sustainable Open-Source Community Tooling & Governance",
+            "content": "Insights into maintainer workflows, release automation, and collaborative governance models for open projects.",
+        },
+        {
+            "title": "Optimizing Monorepo Developer Experience & Incremental Build Caching",
+            "content": "Leveraging remote build caches, dependency graph pruning, and automated change-impact analysis in open codebases.",
+        },
+        {
+            "title": "Open Source Compliance & License Compatibility Management",
+            "content": "Navigating permissiveness, copyleft obligations, and automated license scanning in open-source distributions.",
+        },
+    ],
 }
 
 
@@ -91,16 +211,21 @@ def generate_fallback_ai_digest_items(
     # Pre-calculated synthetic relevance scores for 5 items
     synthetic_scores = [0.95, 0.92, 0.89, 0.86, 0.83]
 
+    tag_usage_count: Dict[str, int] = {}
     items: List[Dict[str, Any]] = []
     for idx in range(5):
         tag = effective_tags[idx % num_tags]
-        template = FALLBACK_ITEM_TEMPLATES.get(
-            tag,
-            {
+        usage_idx = tag_usage_count.get(tag, 0)
+        tag_usage_count[tag] = usage_idx + 1
+
+        templates = FALLBACK_ITEM_TEMPLATES.get(tag, [])
+        if templates:
+            template = templates[usage_idx % len(templates)]
+        else:
+            template = {
                 "title": f"Emerging Innovations & Architecture Patterns in {tag}",
                 "content": f"An actionable technical breakdown of modern design patterns, toolchains, and community insights in {tag}.",
-            },
-        )
+            }
 
         items.append(
             {

@@ -32,6 +32,31 @@ def test_generate_fallback_ai_digest_items():
         assert item["engagement_metadata"].get("is_ai_generated") is True
 
 
+@pytest.mark.parametrize(
+    "tags, expected_unique_count",
+    [
+        (["AI"], 3),  # 1 tag with 3 variants available -> 3 unique items out of 5
+        (["AI", "Python"], 5),  # 2 tags with 3 variants each -> 5 unique items out of 5
+        (["AI", "Machine Learning", "Python"], 5),  # 3 tags (Alice Chen case) -> 5 unique items out of 5
+    ],
+)
+def test_generate_fallback_ai_digest_items_no_duplicates_for_few_tags(
+    tags, expected_unique_count
+):
+    """Assert fallback generator produces unique (title, content) pairs without premature duplication."""
+    items = generate_fallback_ai_digest_items("Alice Chen", tags)
+    assert len(items) == 5
+
+    pairs = [(item["title"], item["content"]) for item in items]
+    unique_pairs = set(pairs)
+    assert len(unique_pairs) == expected_unique_count
+
+    # Verify no duplicate pair appears before all variants for that tag are exhausted
+    first_n_items = pairs[:expected_unique_count]
+    assert len(set(first_n_items)) == expected_unique_count
+
+
+
 def test_generate_ai_digest_items_uses_fallback_when_llm_fails():
     """Test generate_ai_digest_items falls back gracefully when LLM fails."""
     user_name = "Ada Lovelace"
