@@ -18,18 +18,19 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
   variant = "primary",
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [mode, setMode] = useState<"standard" | "diverse">("standard");
+  const [mode, setMode] = useState<"standard" | "diverse" | "ai">("standard");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<boolean>(false);
 
-  const handleGenerate = async (selectedMode: "standard" | "diverse" = mode) => {
+  const handleGenerate = async (
+    selectedMode: "standard" | "diverse" | "ai" = mode
+  ) => {
     setLoading(true);
     setErrorMsg(null);
     setSuccessToast(false);
 
     try {
-      const isDiverse = selectedMode === "diverse";
-      const result = await generateDigest(userId, isDiverse);
+      const result = await generateDigest(userId, selectedMode);
       onSuccess(result);
       setSuccessToast(true);
       setTimeout(() => {
@@ -54,13 +55,16 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
       <div className="regenerate-control-group">
         <select
           value={mode}
-          onChange={(e) => setMode(e.target.value as "standard" | "diverse")}
+          onChange={(e) =>
+            setMode(e.target.value as "standard" | "diverse" | "ai")
+          }
           disabled={loading || !userId}
           className="mode-select"
           aria-label="Regeneration Mode"
         >
           <option value="standard">Standard</option>
           <option value="diverse">More Diverse</option>
+          <option value="ai">AI Creative Digest</option>
         </select>
 
         <button
@@ -96,7 +100,13 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
         <div className="generate-success-toast">
           <span className="toast-icon">✓</span>
           <span>
-            Digest regenerated successfully ({mode === "diverse" ? "More Diverse" : "Standard"})!
+            Digest regenerated successfully ({
+              mode === "ai"
+                ? "AI Creative Digest"
+                : mode === "diverse"
+                ? "More Diverse"
+                : "Standard"
+            })!
           </span>
         </div>
       )}

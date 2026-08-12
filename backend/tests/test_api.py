@@ -132,3 +132,21 @@ async def test_post_digest_upsert_prevents_duplicate_digest(async_client: AsyncC
         digest_count = count_result.scalar()
 
         assert digest_count == 1
+
+
+@pytest.mark.anyio
+async def test_post_digest_ai_mode(async_client: AsyncClient):
+    """Test POST /api/digest/user_1?mode=ai generates an AI creative digest."""
+    response = await async_client.post("/api/digest/user_1?mode=ai")
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data["user_id"] == "user_1"
+    assert "summary_prose" in data
+    assert len(data["items"]) == 5
+
+    first_item = data["items"][0]
+    assert first_item["activity_item_id"].startswith("ai_act_")
+    assert "title" in first_item
+    assert "explanation_text" in first_item
+    assert first_item["relevance_score"] > 0.80

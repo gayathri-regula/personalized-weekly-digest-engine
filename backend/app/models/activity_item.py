@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List
-from sqlalchemy import JSON, DateTime, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
@@ -25,6 +25,9 @@ class ActivityItem(Base):
     )
     engagement_metadata: Mapped[Dict[str, Any]] = mapped_column(
         JSON, nullable=False
+    )
+    is_ai_generated: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false", nullable=False
     )
 
     digest_items: Mapped[List["DigestItem"]] = relationship(
