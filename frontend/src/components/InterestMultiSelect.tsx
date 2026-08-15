@@ -38,15 +38,13 @@ export const InterestMultiSelect: React.FC<InterestMultiSelectProps> = ({
     if (selectedTags.includes(tag)) {
       onChange(selectedTags.filter((t) => t !== tag));
     } else {
-      if (selectedTags.length < 4) {
-        onChange([...selectedTags, tag]);
-      }
+      onChange([...selectedTags, tag]);
     }
   };
 
   const renderSummaryText = () => {
     if (selectedTags.length === 0) {
-      return "Select 2-4 interest topics...";
+      return "Select 2 or more interest topics...";
     }
     return `${selectedTags.length} selected: ${selectedTags.join(", ")}`;
   };
@@ -78,30 +76,26 @@ export const InterestMultiSelect: React.FC<InterestMultiSelectProps> = ({
       {isOpen && (
         <div className="dropdown-menu">
           <div className="dropdown-menu-header">
-            <span>Select 2 to 4 interests:</span>
+            <span>Select 2 or more interests:</span>
             <span className="selection-count-badge">
-              {selectedTags.length}/4
+              {selectedTags.length} selected
             </span>
           </div>
           <div className="options-list">
             {availableInterests.map((tag) => {
               const isChecked = selectedTags.includes(tag);
-              const isMaxReached = selectedTags.length >= 4;
-              const isOptionDisabled = !isChecked && isMaxReached;
 
               return (
                 <label
                   key={tag}
-                  className={`dropdown-option ${isChecked ? "option-selected" : ""} ${
-                    isOptionDisabled ? "option-disabled" : ""
-                  }`}
+                  className={`dropdown-option ${isChecked ? "option-selected" : ""}`}
                 >
                   <input
                     type="checkbox"
                     className="option-checkbox"
                     checked={isChecked}
                     onChange={() => handleToggleTag(tag)}
-                    disabled={isOptionDisabled || disabled}
+                    disabled={disabled}
                   />
                   <span className="custom-option-check">
                     {isChecked ? "✓" : ""}

@@ -50,7 +50,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
   }, []);
 
   const isNameValid = name.trim().length >= 1 && name.trim().length <= 100;
-  const isTagsValid = selectedTags.length >= 2 && selectedTags.length <= 4;
+  const isTagsValid = selectedTags.length >= 2;
   const canSubmit = isNameValid && isTagsValid && !isCreating;
 
   // Step 1: Create user profile ONLY
@@ -108,7 +108,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
         <span className="create-user-badge">✨ Onboarding</span>
         <h3 className="create-user-title">New here? Create your profile</h3>
         <p className="create-user-subtitle">
-          Select 2 to 4 interest topics to receive a personalized weekly digest
+          Select 2 or more interest topics to receive a personalized weekly digest
           ranking.
         </p>
       </div>
@@ -171,7 +171,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
             <div className="interests-header-row">
               <label className="form-label">Interest Topics</label>
               <span className="interests-counter-pill">
-                {selectedTags.length} / 4 Selected
+                {selectedTags.length} Selected
               </span>
             </div>
 
@@ -193,13 +193,9 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
                 <span className="hint-warning">
                   💡 Please select at least 2 interests ({2 - selectedTags.length} more needed).
                 </span>
-              ) : selectedTags.length === 4 ? (
-                <span className="hint-info">
-                  ✓ Maximum of 4 interest topics selected.
-                </span>
               ) : (
                 <span className="hint-success">
-                  ✓ Valid selection ({selectedTags.length} topics chosen). You can add up to 4.
+                  ✓ Valid selection ({selectedTags.length} topics chosen).
                 </span>
               )}
             </div>

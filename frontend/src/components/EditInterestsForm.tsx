@@ -62,7 +62,7 @@ export const EditInterestsForm: React.FC<EditInterestsFormProps> = ({
   const currentSorted = [...selectedTags].sort().join(",");
   const isChanged = initialSorted !== currentSorted;
 
-  const isTagsValid = selectedTags.length >= 2 && selectedTags.length <= 4;
+  const isTagsValid = selectedTags.length >= 2;
   const canSave = isChanged && isTagsValid && !isSaving;
 
   // Step 1: Save interest changes ONLY
@@ -164,7 +164,7 @@ export const EditInterestsForm: React.FC<EditInterestsFormProps> = ({
             <div className="interests-header-row">
               <label className="form-label">Tracked Topics</label>
               <span className="interests-counter-pill">
-                {selectedTags.length} / 4 Selected
+                {selectedTags.length} Selected
               </span>
             </div>
 
@@ -185,10 +185,6 @@ export const EditInterestsForm: React.FC<EditInterestsFormProps> = ({
               {selectedTags.length < 2 ? (
                 <span className="hint-warning">
                   💡 Select at least 2 interests ({2 - selectedTags.length} more needed).
-                </span>
-              ) : selectedTags.length === 4 ? (
-                <span className="hint-info">
-                  ✓ Maximum of 4 interest topics selected.
                 </span>
               ) : !isChanged ? (
                 <span className="hint-info">
