@@ -27,19 +27,21 @@ async def test_update_user_interests_nonexistent_user(async_client: AsyncClient)
 
 
 @pytest.mark.anyio
-async def test_update_user_interests_invalid_tag_count(async_client: AsyncClient):
-    """Test updating with < 2 or > 4 tags returns 422 validation error."""
+async def test_update_user_interests_tag_count_validation(async_client: AsyncClient):
+    """Test updating with < 2 tags returns 422, while 5+ tags succeeds with 200 status code."""
     # 1 tag (too few)
     payload_few = {"interest_tags": ["AI"]}
     res1 = await async_client.patch("/api/users/user_1", json=payload_few)
     assert res1.status_code == 422
 
-    # 5 tags (too many)
+    # 5 tags (now valid, no upper cap)
+    tags_5 = ["AI", "Python", "Cloud", "DevOps", "Security"]
     payload_many = {
-        "interest_tags": ["AI", "Python", "Cloud", "DevOps", "Security"]
+        "interest_tags": tags_5
     }
     res2 = await async_client.patch("/api/users/user_1", json=payload_many)
-    assert res2.status_code == 422
+    assert res2.status_code == 200
+    assert res2.json()["interest_tags"] == tags_5
 
 
 @pytest.mark.anyio

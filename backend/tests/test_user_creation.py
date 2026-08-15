@@ -53,26 +53,33 @@ async def test_create_user_missing_or_empty_name(async_client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_create_user_invalid_tag_count(async_client: AsyncClient):
-    """Test that < 2 or > 4 tags are rejected with 422 status code."""
+async def test_create_user_tag_count_validation(async_client: AsyncClient):
+    """Test that < 2 tags is rejected with 422, while 5+ tags succeed with 201 status code."""
     # 1 tag (too few)
     payload_few = {"name": "Alex Mercer", "interest_tags": ["AI"]}
     res1 = await async_client.post("/api/users", json=payload_few)
     assert res1.status_code == 422
 
-    # 5 tags (too many)
-    payload_many = {
-        "name": "Alex Mercer",
-        "interest_tags": [
-            "AI",
-            "Machine Learning",
-            "Python",
-            "JavaScript",
-            "Cloud",
-        ],
+    # 5 tags (now valid, no upper cap)
+    tags_5 = ["AI", "Machine Learning", "Python", "JavaScript", "Cloud"]
+    payload_5 = {
+        "name": "Alex Mercer 5",
+        "interest_tags": tags_5,
     }
-    res2 = await async_client.post("/api/users", json=payload_many)
-    assert res2.status_code == 422
+    res2 = await async_client.post("/api/users", json=payload_5)
+    assert res2.status_code == 201
+    data2 = res2.json()
+    assert data2["interest_tags"] == tags_5
+
+    # 12 tags (all taxonomy tags, valid)
+    payload_all = {
+        "name": "Alex Mercer All",
+        "interest_tags": INTEREST_TAXONOMY,
+    }
+    res3 = await async_client.post("/api/users", json=payload_all)
+    assert res3.status_code == 201
+    data3 = res3.json()
+    assert data3["interest_tags"] == INTEREST_TAXONOMY
 
 
 @pytest.mark.anyio

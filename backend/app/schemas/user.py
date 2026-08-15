@@ -36,8 +36,7 @@ class UserCreate(BaseModel):
     interest_tags: List[str] = Field(
         ...,
         min_length=2,
-        max_length=4,
-        description="List of 2 to 4 interest tags from taxonomy",
+        description="List of 2 or more interest tags from taxonomy",
     )
 
 
@@ -47,8 +46,7 @@ class UserUpdateInterest(BaseModel):
     interest_tags: List[str] = Field(
         ...,
         min_length=2,
-        max_length=4,
-        description="Updated list of 2 to 4 interest tags from taxonomy",
+        description="Updated list of 2 or more interest tags from taxonomy",
     )
 
 
