@@ -1,7 +1,7 @@
 """SQLAlchemy ORM model for ActivityItem entity."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from sqlalchemy import JSON, Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
@@ -20,6 +20,7 @@ class ActivityItem(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     # Using SQLAlchemy JSON column type to store category_tags as a list of strings.
     category_tags: Mapped[List[str]] = mapped_column(JSON, nullable=False)
+    section_title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
@@ -33,3 +34,4 @@ class ActivityItem(Base):
     digest_items: Mapped[List["DigestItem"]] = relationship(
         "DigestItem", back_populates="activity_item"
     )
+

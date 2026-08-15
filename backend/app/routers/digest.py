@@ -23,7 +23,6 @@ from app.schemas.digest import (
 )
 from app.services.ai_digest_generator import generate_ai_digest_items
 from app.services.ai_suggestions import generate_ai_suggestions
-from app.services.ranker import rank_items_for_user
 from app.services.summarizer import generate_digest_summary
 from app.utils import get_reference_now, get_week_identifier
 
@@ -34,13 +33,11 @@ router = APIRouter(prefix="/digest", tags=["digest"])
 async def boost_user_digest(
     user_id: str, boost_in: BoostRequest, db: AsyncSession = Depends(get_db)
 ) -> BoostedDigestResponse:
-    """Generate a transient, read-only preview of user digest boosted by a specific taxonomy tag."""
-    if boost_in.tag not in INTEREST_TAXONOMY:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Tag '{boost_in.tag}' is not a valid taxonomy interest tag.",
-        )
+    """Generate a transient, read-only preview of user digest boosted by a specific tag/topic.
 
+    Generates 5 fresh AI items emphasizing the boost tag (open-ended), persists the ActivityItem
+    rows with 'boost_act_' IDs for foreign key reference, and returns a BoostedDigestResponse payload.
+    """
     # 1. Fetch user by user_id
     user_result = await db.execute(select(User).where(User.id == user_id))
     user = user_result.scalar_one_or_none()
@@ -50,60 +47,65 @@ async def boost_user_digest(
             detail=f"User '{user_id}' not found",
         )
 
-    # 2. Fetch all real activity items (excluding AI-generated items)
-    items_result = await db.execute(
-        select(ActivityItem)
-        .where(ActivityItem.is_ai_generated == False)
-        .order_by(ActivityItem.created_at.desc())
-    )
-    items = items_result.scalars().all()
-    items_by_id = {item.id: item for item in items}
+    boost_tag = boost_in.tag.strip() if boost_in.tag else "Technology"
 
-    ref_now = get_reference_now()
-
-    # 3. Score and rank items with boost_tag (read-only preview)
-    ranked_items = rank_items_for_user(
-        user=user, items=items, top_n=5, now=ref_now, boost_tag=boost_in.tag
+    # 2. Generate 5 fresh AI items focused on boost_tag
+    raw_ai_items = generate_ai_digest_items(
+        user_name=user.name,
+        interest_tags=[boost_tag] + (user.interest_tags or []),
+        use_llm=True,
     )
 
-    # 4. Fetch existing feedback for user
-    fb_result = await db.execute(
-        select(ItemFeedback).where(ItemFeedback.user_id == user_id)
-    )
-    feedback_map = {
-        fb.activity_item_id: fb.feedback_type for fb in fb_result.scalars().all()
-    }
-
+    # 3. Create and persist ActivityItem objects with prefix "boost_act_"
     response_items = []
-    for r in ranked_items:
-        act_item = items_by_id.get(r.activity_item_id)
-        ditem_id = f"boost_{r.activity_item_id}"
+    for raw in raw_ai_items:
+        boost_act_id = f"boost_act_{uuid4().hex[:12]}"
+        act_obj = ActivityItem(
+            id=boost_act_id,
+            title=raw["title"],
+            content=raw["content"],
+            category_tags=raw["category_tags"],
+            section_title=raw.get("section_title"),
+            created_at=raw["created_at"],
+            engagement_metadata=raw["engagement_metadata"],
+            is_ai_generated=True,
+        )
+        db.add(act_obj)
+
         response_items.append(
             DigestItemResponse(
-                id=ditem_id,
-                activity_item_id=r.activity_item_id,
-                title=act_item.title if act_item else "Untitled",
-                content=act_item.content if act_item else "",
-                category_tags=act_item.category_tags if act_item else [],
-                relevance_score=r.relevance_score,
-                explanation_text=r.explanation_text,
-                rank_position=r.rank_position,
-                feedback_type=feedback_map.get(r.activity_item_id),
-                created_at=act_item.created_at if act_item else None,
+                id=f"boost_item_{boost_act_id}",
+                activity_item_id=boost_act_id,
+                title=raw["title"],
+                content=raw["content"],
+                category_tags=raw["category_tags"],
+                section_title=raw.get("section_title"),
+                relevance_score=raw["relevance_score"],
+                explanation_text=raw.get(
+                    "explanation_text", f"Boosted highlight focused on {boost_tag}"
+                ),
+                rank_position=raw["rank_position"],
+                feedback_type=None,
+                created_at=raw["created_at"],
             )
         )
 
-    return BoostedDigestResponse(boost_tag=boost_in.tag, items=response_items)
+    await db.commit()
+
+    return BoostedDigestResponse(boost_tag=boost_tag, items=response_items)
 
 
 @router.post("/{user_id}", response_model=DigestResponse)
 async def generate_user_digest(
     user_id: str,
-    diversity: bool = False,
+    diversity: Optional[bool] = Query(False),
     mode: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
 ) -> DigestResponse:
-    """Generate or update (upsert) the weekly personalized digest for a user."""
+    """Generate or update (upsert) the weekly personalized digest for a user.
+
+    Uses AI generation as the single unified path for all users and modes.
+    """
     # 1. Fetch user by user_id
     user_result = await db.execute(select(User).where(User.id == user_id))
     user = user_result.scalar_one_or_none()
@@ -117,190 +119,57 @@ async def generate_user_digest(
     week_id = get_week_identifier(ref_now)
     actual_generation_time = datetime.now(timezone.utc)
 
-    # Check if AI mode is requested
-    if mode == "ai":
-        raw_ai_items = generate_ai_digest_items(
-            user_name=user.name,
-            interest_tags=user.interest_tags or [],
-            use_llm=True,
-        )
-
-        # Create ActivityItem ORM objects with is_ai_generated=True and persist them
-        joined_details = []
-        for raw in raw_ai_items:
-            ai_act_id = f"ai_act_{uuid4().hex[:12]}"
-            act_obj = ActivityItem(
-                id=ai_act_id,
-                title=raw["title"],
-                content=raw["content"],
-                category_tags=raw["category_tags"],
-                created_at=raw["created_at"],
-                engagement_metadata=raw["engagement_metadata"],
-                is_ai_generated=True,
-            )
-            db.add(act_obj)
-
-            joined_details.append(
-                {
-                    "activity_item_id": ai_act_id,
-                    "relevance_score": raw["relevance_score"],
-                    "explanation_text": raw["explanation_text"],
-                    "rank_position": raw["rank_position"],
-                    "title": raw["title"],
-                    "content": raw["content"],
-                    "category_tags": raw["category_tags"],
-                    "created_at": raw["created_at"],
-                }
-            )
-
-        summary_prose = generate_digest_summary(
-            user_name=user.name,
-            ranked_items_with_details=joined_details,
-            use_llm=True,
-        )
-
-        ai_suggestions = generate_ai_suggestions(
-            user_name=user.name,
-            interest_tags=user.interest_tags or [],
-            use_llm=True,
-        )
-
-        # Upsert Digest record for this week
-        digest_stmt = select(Digest).where(
-            Digest.user_id == user_id, Digest.week_identifier == week_id
-        )
-        digest_result = await db.execute(digest_stmt)
-        existing_digest = digest_result.scalar_one_or_none()
-
-        if existing_digest is not None:
-            digest_obj = existing_digest
-            digest_obj.generated_at = actual_generation_time
-            digest_obj.summary_prose = summary_prose
-            digest_obj.ai_suggestions = ai_suggestions
-
-            # Find old DigestItem rows and cleanup any old AI-generated ActivityItem rows
-            old_ditems_res = await db.execute(
-                select(DigestItem).where(DigestItem.digest_id == digest_obj.id)
-            )
-            old_ditems = old_ditems_res.scalars().all()
-            old_ai_act_ids = [
-                di.activity_item_id for di in old_ditems if di.activity_item_id.startswith("ai_act_")
-            ]
-
-            await db.execute(
-                delete(DigestItem).where(DigestItem.digest_id == digest_obj.id)
-            )
-            if old_ai_act_ids:
-                await db.execute(
-                    delete(ActivityItem).where(ActivityItem.id.in_(old_ai_act_ids))
-                )
-        else:
-            digest_id = f"digest_{user_id}_{week_id}"
-            digest_obj = Digest(
-                id=digest_id,
-                user_id=user_id,
-                week_identifier=week_id,
-                generated_at=actual_generation_time,
-                summary_prose=summary_prose,
-                ai_suggestions=ai_suggestions,
-            )
-            db.add(digest_obj)
-
-        # Fetch existing feedback for user
-        fb_result = await db.execute(
-            select(ItemFeedback).where(ItemFeedback.user_id == user_id)
-        )
-        feedback_map = {
-            fb.activity_item_id: fb.feedback_type for fb in fb_result.scalars().all()
-        }
-
-        response_items = []
-        for detail in joined_details:
-            ditem_id = f"ditem_{digest_obj.id}_{detail['activity_item_id']}"
-            ditem = DigestItem(
-                id=ditem_id,
-                digest_id=digest_obj.id,
-                activity_item_id=detail["activity_item_id"],
-                relevance_score=detail["relevance_score"],
-                explanation_text=detail["explanation_text"],
-                rank_position=detail["rank_position"],
-            )
-            db.add(ditem)
-
-            response_items.append(
-                DigestItemResponse(
-                    id=ditem_id,
-                    activity_item_id=detail["activity_item_id"],
-                    title=detail["title"],
-                    content=detail["content"],
-                    category_tags=detail["category_tags"],
-                    relevance_score=detail["relevance_score"],
-                    explanation_text=detail["explanation_text"],
-                    rank_position=detail["rank_position"],
-                    feedback_type=feedback_map.get(detail["activity_item_id"]),
-                    created_at=detail["created_at"],
-                )
-            )
-
-        await db.commit()
-
-        return DigestResponse(
-            id=digest_obj.id,
-            user_id=user_id,
-            week_identifier=week_id,
-            generated_at=digest_obj.generated_at,
-            summary_prose=summary_prose,
-            items=response_items,
-            ai_suggestions=[AISuggestion(**s) for s in (digest_obj.ai_suggestions or [])],
-        )
-
-    # 2. Standard / More Diverse deterministic ranker path (UNTOUCHED)
-    # Fetch all real activity items (excluding AI-generated items)
-    items_result = await db.execute(
-        select(ActivityItem)
-        .where(ActivityItem.is_ai_generated == False)
-        .order_by(ActivityItem.created_at.desc())
-    )
-    items = items_result.scalars().all()
-    items_by_id = {item.id: item for item in items}
-
-    # 3. Score and rank items using dataset reference time (ref_now)
-    ranked_items = rank_items_for_user(
-        user=user, items=items, top_n=5, now=ref_now, diversity_boost=diversity
+    # 2. Generate 5 AI activity items for this user (60/40 interest/explore ratio)
+    raw_ai_items = generate_ai_digest_items(
+        user_name=user.name,
+        interest_tags=user.interest_tags or [],
+        use_llm=True,
     )
 
-    # 4. Join ranked items with full ActivityItem data for summarizer
+    # 3. Create ActivityItem ORM objects with is_ai_generated=True and persist them
     joined_details = []
-    for r in ranked_items:
-        act_item = items_by_id.get(r.activity_item_id)
+    for raw in raw_ai_items:
+        ai_act_id = f"ai_act_{uuid4().hex[:12]}"
+        act_obj = ActivityItem(
+            id=ai_act_id,
+            title=raw["title"],
+            content=raw["content"],
+            category_tags=raw["category_tags"],
+            section_title=raw.get("section_title"),
+            created_at=raw["created_at"],
+            engagement_metadata=raw["engagement_metadata"],
+            is_ai_generated=True,
+        )
+        db.add(act_obj)
+
         joined_details.append(
             {
-                "activity_item_id": r.activity_item_id,
-                "relevance_score": r.relevance_score,
-                "explanation_text": r.explanation_text,
-                "rank_position": r.rank_position,
-                "title": act_item.title if act_item else "Untitled",
-                "content": act_item.content if act_item else "",
-                "category_tags": act_item.category_tags if act_item else [],
-                "created_at": act_item.created_at if act_item else None,
+                "activity_item_id": ai_act_id,
+                "relevance_score": raw["relevance_score"],
+                "explanation_text": raw["explanation_text"],
+                "rank_position": raw["rank_position"],
+                "title": raw["title"],
+                "content": raw["content"],
+                "category_tags": raw["category_tags"],
+                "section_title": raw.get("section_title"),
+                "created_at": raw["created_at"],
             }
         )
 
-    # 5. Generate summary prose
+    # 4. Generate summary prose and AI exploratory suggestions
     summary_prose = generate_digest_summary(
         user_name=user.name,
         ranked_items_with_details=joined_details,
         use_llm=True,
     )
 
-    # 6. Generate AI suggestions (exploratory, separate from ranked items)
     ai_suggestions = generate_ai_suggestions(
         user_name=user.name,
         interest_tags=user.interest_tags or [],
         use_llm=True,
     )
 
-    # 6. Upsert Digest record per (user_id, week_identifier) with real generation time
+    # 5. Upsert Digest record per (user_id, week_identifier) with per-user scoped cleanup
     digest_stmt = select(Digest).where(
         Digest.user_id == user_id, Digest.week_identifier == week_id
     )
@@ -313,21 +182,27 @@ async def generate_user_digest(
         digest_obj.summary_prose = summary_prose
         digest_obj.ai_suggestions = ai_suggestions
 
-        # Find old DigestItem rows and cleanup any old AI-generated ActivityItem rows
+        # Collect old DigestItem rows and exact ActivityItem IDs belonging STRICTLY to THIS user's previous digest
         old_ditems_res = await db.execute(
             select(DigestItem).where(DigestItem.digest_id == digest_obj.id)
         )
         old_ditems = old_ditems_res.scalars().all()
-        old_ai_act_ids = [
-            di.activity_item_id for di in old_ditems if di.activity_item_id.startswith("ai_act_")
+        old_user_act_ids = [
+            di.activity_item_id
+            for di in old_ditems
+            if di.activity_item_id.startswith("ai_act_")
+            or di.activity_item_id.startswith("boost_act_")
         ]
 
+        # Delete old DigestItem records for THIS digest
         await db.execute(
             delete(DigestItem).where(DigestItem.digest_id == digest_obj.id)
         )
-        if old_ai_act_ids:
+
+        # Delete ONLY the specific ActivityItem IDs belonging to THIS user's previous digest
+        if old_user_act_ids:
             await db.execute(
-                delete(ActivityItem).where(ActivityItem.id.in_(old_ai_act_ids))
+                delete(ActivityItem).where(ActivityItem.id.in_(old_user_act_ids))
             )
     else:
         digest_id = f"digest_{user_id}_{week_id}"
@@ -341,7 +216,7 @@ async def generate_user_digest(
         )
         db.add(digest_obj)
 
-    # Fetch existing feedback for user
+    # 6. Fetch existing feedback for user
     fb_result = await db.execute(
         select(ItemFeedback).where(ItemFeedback.user_id == user_id)
     )
@@ -351,29 +226,30 @@ async def generate_user_digest(
 
     # 7. Insert new DigestItem rows
     response_items = []
-    for idx, (r, detail) in enumerate(zip(ranked_items, joined_details), start=1):
-        ditem_id = f"ditem_{digest_obj.id}_{r.activity_item_id}"
+    for detail in joined_details:
+        ditem_id = f"ditem_{digest_obj.id}_{detail['activity_item_id']}"
         ditem = DigestItem(
             id=ditem_id,
             digest_id=digest_obj.id,
-            activity_item_id=r.activity_item_id,
-            relevance_score=r.relevance_score,
-            explanation_text=r.explanation_text,
-            rank_position=r.rank_position,
+            activity_item_id=detail["activity_item_id"],
+            relevance_score=detail["relevance_score"],
+            explanation_text=detail["explanation_text"],
+            rank_position=detail["rank_position"],
         )
         db.add(ditem)
 
         response_items.append(
             DigestItemResponse(
                 id=ditem_id,
-                activity_item_id=r.activity_item_id,
+                activity_item_id=detail["activity_item_id"],
                 title=detail["title"],
                 content=detail["content"],
                 category_tags=detail["category_tags"],
-                relevance_score=r.relevance_score,
-                explanation_text=r.explanation_text,
-                rank_position=r.rank_position,
-                feedback_type=feedback_map.get(r.activity_item_id),
+                section_title=detail.get("section_title"),
+                relevance_score=detail["relevance_score"],
+                explanation_text=detail["explanation_text"],
+                rank_position=detail["rank_position"],
+                feedback_type=feedback_map.get(detail["activity_item_id"]),
                 created_at=detail["created_at"],
             )
         )
@@ -383,9 +259,9 @@ async def generate_user_digest(
     return DigestResponse(
         id=digest_obj.id,
         user_id=user_id,
-        week_identifier=digest_obj.week_identifier,
+        week_identifier=week_id,
         generated_at=digest_obj.generated_at,
-        summary_prose=digest_obj.summary_prose,
+        summary_prose=summary_prose,
         items=response_items,
         ai_suggestions=[AISuggestion(**s) for s in (digest_obj.ai_suggestions or [])],
     )
@@ -451,6 +327,7 @@ async def get_latest_user_digest(
     response_items = []
     for di in ditems:
         act = act_map.get(di.activity_item_id)
+        section_title = act.section_title if act else None
         response_items.append(
             DigestItemResponse(
                 id=di.id,
@@ -458,6 +335,7 @@ async def get_latest_user_digest(
                 title=act.title if act else "Untitled",
                 content=act.content if act else "",
                 category_tags=act.category_tags if act else [],
+                section_title=section_title,
                 relevance_score=di.relevance_score,
                 explanation_text=di.explanation_text,
                 rank_position=di.rank_position,
@@ -475,3 +353,5 @@ async def get_latest_user_digest(
         items=response_items,
         ai_suggestions=[AISuggestion(**s) for s in (digest_obj.ai_suggestions or [])],
     )
+
+

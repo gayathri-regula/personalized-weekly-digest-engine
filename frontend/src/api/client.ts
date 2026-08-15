@@ -185,21 +185,10 @@ export async function getDigest(userId: string): Promise<Digest | null> {
 
 /**
  * Trigger on-demand generation (or regeneration) of a weekly digest for a user.
- * Supports legacy boolean `diversity` or explicit mode string ("standard" | "diverse" | "ai").
  */
-export async function generateDigest(
-  userId: string,
-  diversityOrMode: boolean | "standard" | "diverse" | "ai" = false
-): Promise<Digest> {
+export async function generateDigest(userId: string): Promise<Digest> {
   try {
-    let queryParam = "";
-    if (diversityOrMode === true || diversityOrMode === "diverse") {
-      queryParam = "?diversity=true";
-    } else if (diversityOrMode === "ai") {
-      queryParam = "?mode=ai";
-    }
-
-    const url = `${API_BASE_URL}/api/digest/${userId}${queryParam}`;
+    const url = `${API_BASE_URL}/api/digest/${userId}`;
     const response = await fetch(url, {
       method: "POST",
     });

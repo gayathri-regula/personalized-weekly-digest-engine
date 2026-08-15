@@ -223,7 +223,7 @@ export const DigestView: React.FC<DigestViewProps> = ({ user }) => {
         <div className="not-found-badge">No Digest Pending</div>
         <h2>Weekly Digest for {user.name} Not Yet Generated</h2>
         <p>
-          We haven't compiled a digest for <strong>{user.name}</strong> for the current target week yet. Click below to trigger the personalized relevance ranker and AI prose summarizer.
+          We haven't compiled a digest for <strong>{user.name}</strong> for the current target week yet. Click below to generate their personalized weekly digest.
         </p>
         <GenerateButton
           userId={user.id}

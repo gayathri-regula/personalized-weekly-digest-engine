@@ -18,19 +18,16 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
   variant = "primary",
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [mode, setMode] = useState<"standard" | "diverse" | "ai">("standard");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<boolean>(false);
 
-  const handleGenerate = async (
-    selectedMode: "standard" | "diverse" | "ai" = mode
-  ) => {
+  const handleGenerate = async () => {
     setLoading(true);
     setErrorMsg(null);
     setSuccessToast(false);
 
     try {
-      const result = await generateDigest(userId, selectedMode);
+      const result = await generateDigest(userId);
       onSuccess(result);
       setSuccessToast(true);
       setTimeout(() => {
@@ -53,22 +50,8 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
   return (
     <div className="generate-btn-wrapper">
       <div className="regenerate-control-group">
-        <select
-          value={mode}
-          onChange={(e) =>
-            setMode(e.target.value as "standard" | "diverse" | "ai")
-          }
-          disabled={loading || !userId}
-          className="mode-select"
-          aria-label="Regeneration Mode"
-        >
-          <option value="standard">Standard</option>
-          <option value="diverse">More Diverse</option>
-          <option value="ai">AI Creative Digest</option>
-        </select>
-
         <button
-          onClick={() => handleGenerate(mode)}
+          onClick={handleGenerate}
           disabled={loading || !userId}
           className={`btn-generate ${variant === "secondary" ? "btn-secondary" : "btn-primary"} ${
             successToast ? "btn-success-flash" : ""
@@ -99,15 +82,7 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
       {successToast && (
         <div className="generate-success-toast">
           <span className="toast-icon">✓</span>
-          <span>
-            Digest regenerated successfully ({
-              mode === "ai"
-                ? "AI Creative Digest"
-                : mode === "diverse"
-                ? "More Diverse"
-                : "Standard"
-            })!
-          </span>
+          <span>Digest regenerated successfully!</span>
         </div>
       )}
 

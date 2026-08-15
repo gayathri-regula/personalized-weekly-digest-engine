@@ -15,6 +15,9 @@ class DigestItemResponse(BaseModel):
     category_tags: List[str] = Field(
         default_factory=list, description="Category tags for the activity item"
     )
+    section_title: Optional[str] = Field(
+        default=None, description="Clean UI section category header for grouping related items"
+    )
     relevance_score: float = Field(
         ..., description="Computed relevance score (0.0 to 1.0)"
     )

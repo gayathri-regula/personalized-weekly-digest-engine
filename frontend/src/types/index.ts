@@ -35,6 +35,7 @@ export interface DigestItem {
   title: string;
   content: string;
   category_tags: string[];
+  section_title?: string;
   relevance_score: number;
   explanation_text: string;
   rank_position: number;
