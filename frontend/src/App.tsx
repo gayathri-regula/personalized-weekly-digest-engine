@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { DigestView } from "./components/DigestView";
+import { LeftSidebar } from "./components/LeftSidebar";
 import { SideDrawer } from "./components/SideDrawer";
+import { TopHeader } from "./components/TopHeader";
 import { User } from "./types";
 import "./App.css";
 
@@ -8,6 +10,17 @@ export const App: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [userRefreshKey, setUserRefreshKey] = useState<number>(0);
+  const [activeNav, setActiveNav] = useState<string>("dashboard");
+
+  // Toast notification state for placeholder interactions
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => {
+      setToastMessage((current) => (current === message ? null : current));
+    }, 3500);
+  };
 
   const handleUserSelect = (user: User) => {
     setSelectedUser(user);
@@ -18,35 +31,59 @@ export const App: React.FC = () => {
     setSelectedUser(newUser);
   };
 
+  const handleNavSelect = (navKey: string) => {
+    setActiveNav(navKey);
+    if (navKey === "interests") {
+      setIsDrawerOpen(true);
+    }
+  };
+
   return (
-    <div className="app-layout">
-      {/* Top Navbar */}
-      <header className="app-navbar">
-        <div className="navbar-container">
-          <div className="navbar-left">
-            <button
-              onClick={() => setIsDrawerOpen(true)}
-              className="hamburger-btn"
-              aria-label="Open profile controls drawer"
-            >
-              ☰
-            </button>
-            <div className="brand-logo">
-              <span className="logo-icon">⚡</span>
-              <div className="brand-text">
-                <span className="brand-name">Personalized Digest Engine</span>
-                <span className="brand-sub">
-                  AI Relevance Ranker & Prose Summarizer
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="navbar-badge">
-            <span className="status-dot"></span>
-            Live Supabase Postgres
-          </div>
+    <div className="redesign-app-shell">
+      {/* Toast Notification Banner */}
+      {toastMessage && (
+        <div className="redesign-toast-banner" role="alert">
+          <span className="toast-icon">ℹ️</span>
+          <span className="toast-message">{toastMessage}</span>
+          <button
+            type="button"
+            className="btn-close-toast"
+            onClick={() => setToastMessage(null)}
+            aria-label="Close notification"
+          >
+            ✕
+          </button>
         </div>
-      </header>
+      )}
+
+      {/* Main Dashboard Layout Container */}
+      <div className="redesign-dashboard-layout">
+        {/* Left Sidebar Navigation */}
+        <LeftSidebar
+          selectedUser={selectedUser}
+          activeNav={activeNav}
+          onNavSelect={handleNavSelect}
+          onOpenDrawer={() => setIsDrawerOpen(true)}
+          onShowToast={showToast}
+        />
+
+        {/* Main Content Area */}
+        <main className="redesign-main-content">
+          <div className="redesign-content-container">
+            {/* Top Greeting Header */}
+            <TopHeader
+              user={selectedUser}
+              onOpenDrawer={() => setIsDrawerOpen(true)}
+              onShowToast={showToast}
+            />
+
+            {/* Existing Main Digest View */}
+            <section className="digest-display-area">
+              <DigestView user={selectedUser} />
+            </section>
+          </div>
+        </main>
+      </div>
 
       {/* Side Drawer Component */}
       <SideDrawer
@@ -57,21 +94,6 @@ export const App: React.FC = () => {
         onUserCreated={handleUserCreated}
         refreshKey={userRefreshKey}
       />
-
-      {/* Main Content Body */}
-      <main className="app-main-content">
-        <div className="content-container">
-          {/* Main Digest View Section */}
-          <section className="digest-display-area">
-            <DigestView user={selectedUser} />
-          </section>
-        </div>
-      </main>
-
-      {/* App Footer */}
-      <footer className="app-footer">
-        <p>Personalized Weekly Digest Engine • React Frontend</p>
-      </footer>
     </div>
   );
 };

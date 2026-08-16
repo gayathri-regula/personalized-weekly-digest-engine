@@ -1815,4 +1815,448 @@
   border-radius: var(--radius-sm);
 }
 
+/* ==========================================================================
+   Chunk A: Dashboard Shell, LeftSidebar & TopHeader (Light Theme)
+   ========================================================================== */
+
+.redesign-app-shell {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+  color: var(--text-main);
+  position: relative;
+}
+
+.redesign-dashboard-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+/* Left Sidebar (Light Theme) */
+.redesign-left-sidebar {
+  background: var(--bg-card);
+  border-right: 1px solid var(--bg-card-border);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-subtle);
+}
+
+.redesign-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.redesign-brand-icon {
+  font-size: 1.6rem;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.redesign-brand-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.redesign-brand-name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.redesign-brand-sub {
+  font-size: 0.72rem;
+  color: var(--primary-accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.redesign-profile-card {
+  background: #f8fafc;
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.redesign-profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.redesign-profile-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+.redesign-profile-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.redesign-profile-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.btn-switch-profile {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-switch-profile:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.redesign-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
+}
+
+.redesign-nav-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  padding-left: 0.5rem;
+}
+
+.redesign-nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.redesign-nav-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid transparent;
+  color: #334155;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.redesign-nav-btn:hover:not(.is-placeholder) {
+  background: #f1f5f9;
+  color: var(--text-main);
+}
+
+.redesign-nav-btn.active {
+  background: rgba(79, 70, 229, 0.08);
+  border-color: rgba(79, 70, 229, 0.2);
+  color: #4338ca;
+  font-weight: 600;
+}
+
+.redesign-nav-btn.is-placeholder {
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.nav-btn-icon {
+  font-size: 1.05rem;
+  width: 20px;
+  text-align: center;
+}
+
+.nav-btn-label {
+  flex-grow: 1;
+}
+
+.redesign-soon-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+
+.redesign-sidebar-footer {
+  padding-top: 1rem;
+  border-top: 1px solid var(--bg-card-border);
+}
+
+.redesign-system-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Main Content Column & Top Header (Light Theme) */
+.redesign-main-content {
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+}
+
+.redesign-content-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.redesign-top-header {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  box-shadow: var(--shadow-subtle);
+}
+
+.redesign-header-greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.redesign-greeting-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.redesign-greeting-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.redesign-header-search {
+  flex-grow: 1;
+  max-width: 380px;
+}
+
+.redesign-search-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: not-allowed;
+  transition: all 0.2s ease;
+}
+
+.redesign-search-box:hover {
+  border-color: #94a3b8;
+}
+
+.search-box-icon {
+  font-size: 0.95rem;
+  color: #94a3b8;
+}
+
+.search-box-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.search-box-shortcut {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #e2e8f0;
+  color: #64748b;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.redesign-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.btn-header-bell {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.btn-header-bell:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.bell-icon-text {
+  font-size: 1rem;
+}
+
+.bell-badge-count {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background: var(--error-color);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-header-avatar {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem 0.35rem 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-header-avatar:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.avatar-circle-sm {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-label-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.avatar-dropdown-arrow {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Toast Notification Banner (Light Theme) */
+.redesign-toast-banner {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  background: #ffffff;
+  border: 1px solid var(--primary-accent);
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.2);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-weight: 500;
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.btn-close-toast {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.btn-close-toast:hover {
+  color: var(--text-main);
+  background: #f1f5f9;
+}
+
+
 
