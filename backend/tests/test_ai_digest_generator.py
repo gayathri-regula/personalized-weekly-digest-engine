@@ -107,7 +107,7 @@ def test_generate_ai_digest_items_uses_fallback_when_llm_fails():
 
 
 def test_call_llm_ai_digest_generator_mock_success():
-    """Test call_llm_ai_digest_generator with a mocked Anthropic response including section_title."""
+    """Test call_llm_ai_digest_generator with a mocked Groq response including section_title."""
     mock_client = MagicMock()
     mock_response = MagicMock()
 
@@ -119,10 +119,10 @@ def test_call_llm_ai_digest_generator_mock_success():
       {"title": "AI Title 5", "content": "AI Description 5.", "category_tags": ["Edge Computing"], "section_title": "Edge & Autonomous Systems", "explanation_text": "Exploratory update: Edge Computing"}
     ]"""
 
-    mock_block = MagicMock()
-    mock_block.text = mock_json_content
-    mock_response.content = [mock_block]
-    mock_client.messages.create.return_value = mock_response
+    mock_choice = MagicMock()
+    mock_choice.message.content = mock_json_content
+    mock_response.choices = [mock_choice]
+    mock_client.chat.completions.create.return_value = mock_response
 
     items = call_llm_ai_digest_generator(
         user_name="Alan Turing",

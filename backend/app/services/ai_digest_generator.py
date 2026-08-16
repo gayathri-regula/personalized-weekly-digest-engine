@@ -17,7 +17,7 @@ from app.utils import get_reference_now
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CLAUDE_MODEL: str = "claude-sonnet-4-6"
+DEFAULT_GROQ_MODEL: str = "llama-3.3-70b-versatile"
 DEFAULT_TIMEOUT_SECONDS: float = 15.0
 
 # Exploratory topics for fallback generation outside standard taxonomy tags
@@ -431,12 +431,12 @@ def call_llm_ai_digest_generator(
     client: Optional[Any] = None,
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
 ) -> List[Dict[str, Any]]:
-    """Execute API request to Anthropic Claude to generate 5 open-ended activity items.
+    """Execute API request to Groq LLM to generate 5 open-ended activity items.
 
     Args:
         user_name: Name of target user.
         interest_tags: List of interest tags.
-        client: Optional injected Anthropic client or mock client.
+        client: Optional injected Groq client or mock client.
         timeout: API call timeout in seconds.
 
     Returns:
@@ -448,29 +448,31 @@ def call_llm_ai_digest_generator(
     prompt = build_ai_digest_prompt(user_name, interest_tags)
 
     if client is None:
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             raise ValueError(
-                "ANTHROPIC_API_KEY environment variable is missing or empty."
+                "GROQ_API_KEY environment variable is missing or empty."
             )
-        import anthropic
+        import groq
 
-        client = anthropic.Anthropic(api_key=api_key, timeout=timeout)
+        client = groq.Groq(api_key=api_key, timeout=timeout)
 
-    response = client.messages.create(
-        model=DEFAULT_CLAUDE_MODEL,
+    response = client.chat.completions.create(
+        model=DEFAULT_GROQ_MODEL,
         max_tokens=1200,
         temperature=0.7,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    if hasattr(response, "content") and response.content:
-        first_block = response.content[0]
+    if hasattr(response, "choices") and response.choices:
+        first_choice = response.choices[0]
         text_content = ""
-        if hasattr(first_block, "text"):
-            text_content = first_block.text.strip()
-        elif isinstance(first_block, dict) and "text" in first_block:
-            text_content = first_block["text"].strip()
+        if hasattr(first_choice, "message") and hasattr(first_choice.message, "content") and first_choice.message.content:
+            text_content = first_choice.message.content.strip()
+        elif isinstance(first_choice, dict) and "message" in first_choice:
+            msg = first_choice["message"]
+            if isinstance(msg, dict) and "content" in msg and msg["content"]:
+                text_content = msg["content"].strip()
 
         # Clean JSON markdown fences if present
         if text_content.startswith("```"):
@@ -523,7 +525,7 @@ def call_llm_ai_digest_generator(
                 )
             return results
 
-    raise RuntimeError("Claude API response did not contain 5 valid generated item objects.")
+    raise RuntimeError("Groq API response did not contain 5 valid generated item objects.")
 
 
 def generate_ai_digest_items(

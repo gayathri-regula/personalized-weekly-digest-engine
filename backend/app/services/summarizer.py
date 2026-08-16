@@ -11,8 +11,8 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
-# Default Anthropic model per ARCHITECTURE.md Section 4.1
-DEFAULT_CLAUDE_MODEL: str = "claude-sonnet-4-6"
+# Default Groq model
+DEFAULT_GROQ_MODEL: str = "llama-3.3-70b-versatile"
 DEFAULT_TIMEOUT_SECONDS: float = 15.0
 
 
@@ -95,12 +95,12 @@ def call_llm_summarizer(
     client: Optional[Any] = None,
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
 ) -> str:
-    """Execute API request to Anthropic Claude to generate digest summary prose.
+    """Execute API request to Groq LLM to generate digest summary prose.
 
     Args:
         user_name: Name of the target user.
         ranked_items_with_details: Joined list of items with details.
-        client: Optional injected Anthropic client or mock client for testing.
+        client: Optional injected Groq client or mock client for testing.
         timeout: API call timeout in seconds.
 
     Returns:
@@ -112,32 +112,34 @@ def call_llm_summarizer(
     prompt = build_claude_prompt(user_name, ranked_items_with_details)
 
     if client is None:
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             raise ValueError(
-                "ANTHROPIC_API_KEY environment variable is missing or empty."
+                "GROQ_API_KEY environment variable is missing or empty."
             )
-        import anthropic
+        import groq
 
-        client = anthropic.Anthropic(api_key=api_key, timeout=timeout)
+        client = groq.Groq(api_key=api_key, timeout=timeout)
 
-    # Call messages API
-    response = client.messages.create(
-        model=DEFAULT_CLAUDE_MODEL,
+    # Call chat completions API
+    response = client.chat.completions.create(
+        model=DEFAULT_GROQ_MODEL,
         max_tokens=300,
         temperature=0.7,
         messages=[{"role": "user", "content": prompt}],
     )
 
     # Extract response content text
-    if hasattr(response, "content") and response.content:
-        first_block = response.content[0]
-        if hasattr(first_block, "text"):
-            return first_block.text.strip()
-        elif isinstance(first_block, dict) and "text" in first_block:
-            return first_block["text"].strip()
+    if hasattr(response, "choices") and response.choices:
+        first_choice = response.choices[0]
+        if hasattr(first_choice, "message") and hasattr(first_choice.message, "content") and first_choice.message.content:
+            return first_choice.message.content.strip()
+        elif isinstance(first_choice, dict) and "message" in first_choice:
+            msg = first_choice["message"]
+            if isinstance(msg, dict) and "content" in msg and msg["content"]:
+                return msg["content"].strip()
 
-    raise RuntimeError("Unexpected response structure from Anthropic API.")
+    raise RuntimeError("Unexpected response structure from Groq API.")
 
 
 def generate_digest_summary(

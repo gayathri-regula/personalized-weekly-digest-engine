@@ -40,7 +40,7 @@ def test_generate_ai_suggestions_use_llm_false():
 
 
 def test_generate_ai_suggestions_missing_api_key(monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
     suggestions = generate_ai_suggestions("Charlie", ["Security"], use_llm=True)
     assert len(suggestions) == 3
     for s in suggestions:
@@ -51,8 +51,8 @@ def test_generate_ai_suggestions_missing_api_key(monkeypatch):
 
 def test_generate_ai_suggestions_llm_success_mocked():
     mock_client = MagicMock()
-    mock_content_block = MagicMock()
-    mock_content_block.text = (
+    mock_choice = MagicMock()
+    mock_choice.message.content = (
         '[\n'
         '  {"title": "Idea 1", "description": "Desc 1", "related_tag": "UI/UX Design"},\n'
         '  {"title": "Idea 2", "description": "Desc 2", "related_tag": "Cloud"},\n'
@@ -60,8 +60,8 @@ def test_generate_ai_suggestions_llm_success_mocked():
         ']'
     )
     mock_response = MagicMock()
-    mock_response.content = [mock_content_block]
-    mock_client.messages.create.return_value = mock_response
+    mock_response.choices = [mock_choice]
+    mock_client.chat.completions.create.return_value = mock_response
 
     suggestions = generate_ai_suggestions(
         "Diana", ["UI/UX Design"], use_llm=True, client=mock_client
@@ -76,7 +76,7 @@ def test_generate_ai_suggestions_llm_success_mocked():
 
 def test_generate_ai_suggestions_llm_exception_fallback():
     mock_client = MagicMock()
-    mock_client.messages.create.side_effect = RuntimeError("API Rate Limit")
+    mock_client.chat.completions.create.side_effect = RuntimeError("API Rate Limit")
 
     suggestions = generate_ai_suggestions(
         "Ethan", ["Open Source"], use_llm=True, client=mock_client

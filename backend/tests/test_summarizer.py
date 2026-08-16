@@ -34,16 +34,16 @@ def sample_items_with_details() -> List[Dict[str, Any]]:
 
 
 def test_generate_digest_summary_llm_success(sample_items_with_details):
-    """Test LLM path when mocked Anthropic client returns valid prose."""
+    """Test LLM path when mocked Groq client returns valid prose."""
     mock_client = MagicMock()
     mock_response = MagicMock()
-    mock_text_block = MagicMock()
-    mock_text_block.text = (
+    mock_choice = MagicMock()
+    mock_choice.message.content = (
         "Alice, here is your weekly digest: PyTorch 2.4 compiler optimizations and Whisper "
         "multilingual speech recognition fine-tuning highlight your top updates in AI and Python."
     )
-    mock_response.content = [mock_text_block]
-    mock_client.messages.create.return_value = mock_response
+    mock_response.choices = [mock_choice]
+    mock_client.chat.completions.create.return_value = mock_response
 
     summary = generate_digest_summary(
         user_name="Alice Chen",
@@ -53,7 +53,7 @@ def test_generate_digest_summary_llm_success(sample_items_with_details):
     )
 
     assert "Alice, here is your weekly digest" in summary
-    mock_client.messages.create.assert_called_once()
+    mock_client.chat.completions.create.assert_called_once()
 
 
 def test_generate_digest_summary_use_llm_false(sample_items_with_details):
@@ -72,7 +72,7 @@ def test_generate_digest_summary_use_llm_false(sample_items_with_details):
 def test_generate_digest_summary_llm_exception_fallback(sample_items_with_details):
     """Test that any exception raised during LLM call gracefully triggers fallback."""
     mock_client = MagicMock()
-    mock_client.messages.create.side_effect = RuntimeError("API Timeout / Connection Error")
+    mock_client.chat.completions.create.side_effect = RuntimeError("API Timeout / Connection Error")
 
     summary = generate_digest_summary(
         user_name="Bob Smith",
@@ -106,7 +106,7 @@ def test_empty_ranked_items_edge_case():
 
 
 def test_missing_api_key_triggers_fallback(sample_items_with_details):
-    """Test that missing ANTHROPIC_API_KEY triggers fallback gracefully."""
+    """Test that missing GROQ_API_KEY triggers fallback gracefully."""
     with patch.dict("os.environ", {}, clear=True):
         summary = generate_digest_summary(
             user_name="Charlie Davis",
