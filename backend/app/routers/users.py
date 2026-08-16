@@ -9,6 +9,7 @@ from app.constants import INTEREST_TAXONOMY
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdateInterest, UsersListResponse
+from app.services.activity_logger import log_user_activity
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -116,6 +117,15 @@ async def update_user_interests(
 
     # Update ONLY interest_tags column
     user.interest_tags = update_in.interest_tags
+
+    tags_str = ", ".join(update_in.interest_tags) if update_in.interest_tags else "None"
+    await log_user_activity(
+        db,
+        user_id=user_id,
+        event_type="interests_updated",
+        description=f"Updated focus topics to: {tags_str}",
+    )
+
     await db.commit()
     await db.refresh(user)
 

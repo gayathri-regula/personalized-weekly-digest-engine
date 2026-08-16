@@ -10,6 +10,7 @@ from app.models.activity_item import ActivityItem
 from app.models.feedback import ItemFeedback
 from app.models.user import User
 from app.schemas.feedback import FeedbackRequest, FeedbackResponse
+from app.services.activity_logger import log_user_activity
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
@@ -70,6 +71,14 @@ async def submit_item_feedback(
             created_at=now_utc,
         )
         db.add(fb_obj)
+
+    readable_type = feedback_in.feedback_type.replace("_", " ").title()
+    await log_user_activity(
+        db,
+        user_id=user_id,
+        event_type="feedback_submitted",
+        description=f"Marked story as '{readable_type}'",
+    )
 
     await db.commit()
     await db.refresh(fb_obj)

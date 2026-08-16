@@ -23,6 +23,7 @@ from app.schemas.digest import (
 )
 from app.services.ai_digest_generator import generate_ai_digest_items
 from app.services.ai_suggestions import generate_ai_suggestions
+from app.services.activity_logger import log_user_activity
 from app.services.summarizer import generate_digest_summary
 from app.utils import get_reference_now, get_week_identifier
 
@@ -253,6 +254,13 @@ async def generate_user_digest(
                 created_at=detail["created_at"],
             )
         )
+
+    await log_user_activity(
+        db,
+        user_id=user_id,
+        event_type="digest_generated",
+        description=f"Compiled weekly digest for Week {week_id} ({len(response_items)} stories)",
+    )
 
     await db.commit()
 
