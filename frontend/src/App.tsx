@@ -77,9 +77,14 @@ export const App: React.FC = () => {
               onShowToast={showToast}
             />
 
-            {/* Existing Main Digest View */}
+            {/* Redesigned Main Digest View */}
             <section className="digest-display-area">
-              <DigestView user={selectedUser} />
+              <DigestView
+                user={selectedUser}
+                onOpenDrawer={() => setIsDrawerOpen(true)}
+                onOpenEditInterests={() => setIsDrawerOpen(true)}
+                onShowToast={showToast}
+              />
             </section>
           </div>
         </main>
