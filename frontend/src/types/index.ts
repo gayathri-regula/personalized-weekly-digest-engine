@@ -70,3 +70,37 @@ export interface ApiFetchResult<T> {
   error: string | null;
   isNotFound: boolean;
 }
+
+export interface SavedItemResponse {
+  id: string;
+  user_id: string;
+  activity_item_id: string;
+  created_at: string;
+}
+
+export interface SavedItemDetail {
+  id: string;
+  user_id: string;
+  activity_item_id: string;
+  title: string;
+  content: string;
+  category_tags: string[];
+  section_title?: string | null;
+  explanation_text?: string | null;
+  created_at?: string | null;
+  saved_at: string;
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  user_id: string;
+  event_type: string;
+  description: string;
+  created_at: string;
+}
+
+export interface ActivityLogListResponse {
+  items: ActivityLogEntry[];
+  total: number;
+}
+

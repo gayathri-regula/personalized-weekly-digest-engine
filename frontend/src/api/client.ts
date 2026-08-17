@@ -1,8 +1,12 @@
 import {
+  ActivityLogEntry,
+  ActivityLogListResponse,
   BoostedDigest,
   Digest,
   FeedbackResponse,
   InterestsResponse,
+  SavedItemDetail,
+  SavedItemResponse,
   User,
   UsersListResponse,
 } from "../types";
@@ -293,4 +297,126 @@ export async function submitFeedback(
     );
   }
 }
+
+/**
+ * Save an activity item for a user profile.
+ */
+export async function saveItem(
+  userId: string,
+  itemId: string
+): Promise<SavedItemResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/saved/${userId}/${itemId}`,
+      {
+        method: "POST",
+      }
+    );
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(`Failed to save item: ${detail}`, response.status);
+    }
+    const data: SavedItemResponse = await response.json();
+    return data;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Backend server unreachable during item save operation.",
+      0
+    );
+  }
+}
+
+/**
+ * Unsave (remove) an activity item from a user's saved reading list.
+ */
+export async function unsaveItem(
+  userId: string,
+  itemId: string
+): Promise<void> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/saved/${userId}/${itemId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(`Failed to unsave item: ${detail}`, response.status);
+    }
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Backend server unreachable during item unsave operation.",
+      0
+    );
+  }
+}
+
+/**
+ * Retrieve all saved reading list items for a specific user profile.
+ */
+export async function getSavedItems(
+  userId: string
+): Promise<SavedItemDetail[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/saved/${userId}`);
+    if (!response.ok) {
+      throw new ApiError(
+        `Failed to fetch saved items: HTTP ${response.status}`,
+        response.status
+      );
+    }
+    const data: SavedItemDetail[] = await response.json();
+    return data || [];
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Unable to connect to backend server during saved items fetch.",
+      0
+    );
+  }
+}
+
+/**
+ * Fetch paginated activity history log entries for a user profile.
+ */
+export async function getActivityLog(
+  userId: string,
+  limit: number = 50
+): Promise<ActivityLogEntry[]> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/activity/${userId}?limit=${limit}`
+    );
+    if (!response.ok) {
+      throw new ApiError(
+        `Failed to fetch activity log: HTTP ${response.status}`,
+        response.status
+      );
+    }
+    const data: ActivityLogListResponse = await response.json();
+    return data.items || [];
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Unable to connect to backend server during activity log fetch.",
+      0
+    );
+  }
+}
+
 

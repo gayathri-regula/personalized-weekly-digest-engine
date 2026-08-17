@@ -1,5 +1,6 @@
-import React from "react";
-import { Digest, User } from "../types";
+import React, { useEffect, useState } from "react";
+import { getActivityLog } from "../api/client";
+import { ActivityLogEntry, Digest, User } from "../types";
 
 interface RightSidebarProps {
   user: User | null;
@@ -14,6 +15,40 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   onOpenEditInterests,
   onShowToast,
 }) => {
+  const [recentActivities, setRecentActivities] = useState<ActivityLogEntry[]>([]);
+  const [loadingActivity, setLoadingActivity] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!user) {
+      setRecentActivities([]);
+      return;
+    }
+    let isSubscribed = true;
+    const fetchRecent = async () => {
+      setLoadingActivity(true);
+      try {
+        const data = await getActivityLog(user.id, 5);
+        if (isSubscribed) {
+          setRecentActivities(data);
+        }
+      } catch {
+        if (isSubscribed) {
+          setRecentActivities([]);
+        }
+      } finally {
+        if (isSubscribed) {
+          setLoadingActivity(false);
+        }
+      }
+    };
+
+    fetchRecent();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [user, digest]);
+
   return (
     <aside className="redesign-right-sidebar">
       {/* Panel 1: Your Digest is Ready */}
@@ -130,18 +165,51 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         </div>
       </div>
 
-      {/* Panel 5: Recent Activity (Visual Placeholder) */}
+      {/* Panel 5: Recent Activity */}
       <div className="right-panel-card activity-panel">
         <div className="right-panel-header">
           <span className="panel-header-icon">🕒</span>
           <h3 className="panel-header-title">Recent Activity</h3>
         </div>
-        <div className="activity-empty-state">
-          <span className="activity-empty-icon">📋</span>
-          <p className="activity-empty-title">No recent activity recorded.</p>
-          <span className="activity-empty-sub">Activity history logging coming soon</span>
-        </div>
+
+        {!user || recentActivities.length === 0 ? (
+          <div className="activity-empty-state">
+            <span className="activity-empty-icon">📋</span>
+            <p className="activity-empty-title">
+              {loadingActivity ? "Loading activity..." : "No recent activity recorded."}
+            </p>
+            <span className="activity-empty-sub">
+              {loadingActivity ? "Fetching events" : "Actions you take will appear here"}
+            </span>
+          </div>
+        ) : (
+          <div className="sidebar-activity-list">
+            {recentActivities.map((act) => {
+              let icon = "📝";
+              if (act.event_type === "digest_generated") icon = "✨";
+              else if (act.event_type.includes("saved")) icon = "🔖";
+              else if (act.event_type.includes("feedback")) icon = "👍";
+              else if (act.event_type.includes("interests")) icon = "🎯";
+
+              return (
+                <div key={act.id} className="sidebar-activity-item">
+                  <span className="sidebar-act-icon">{icon}</span>
+                  <div className="sidebar-act-details">
+                    <span className="sidebar-act-desc">{act.description}</span>
+                    <span className="sidebar-act-time">
+                      {new Date(act.created_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </aside>
   );
 };
+

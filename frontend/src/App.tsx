@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { ActivityHistoryView } from "./components/ActivityHistoryView";
 import { DigestView } from "./components/DigestView";
 import { LeftSidebar } from "./components/LeftSidebar";
+import { SavedItemsView } from "./components/SavedItemsView";
 import { SideDrawer } from "./components/SideDrawer";
 import { TopHeader } from "./components/TopHeader";
 import { User } from "./types";
@@ -77,14 +79,26 @@ export const App: React.FC = () => {
               onShowToast={showToast}
             />
 
-            {/* Redesigned Main Digest View */}
+            {/* Redesigned Main Digest / Saved / History Display Area */}
             <section className="digest-display-area">
-              <DigestView
-                user={selectedUser}
-                onOpenDrawer={() => setIsDrawerOpen(true)}
-                onOpenEditInterests={() => setIsDrawerOpen(true)}
-                onShowToast={showToast}
-              />
+              {activeNav === "saved" ? (
+                <SavedItemsView
+                  user={selectedUser}
+                  onOpenDrawer={() => setIsDrawerOpen(true)}
+                />
+              ) : activeNav === "history" ? (
+                <ActivityHistoryView
+                  user={selectedUser}
+                  onOpenDrawer={() => setIsDrawerOpen(true)}
+                />
+              ) : (
+                <DigestView
+                  user={selectedUser}
+                  onOpenDrawer={() => setIsDrawerOpen(true)}
+                  onOpenEditInterests={() => setIsDrawerOpen(true)}
+                  onShowToast={showToast}
+                />
+              )}
             </section>
           </div>
         </main>

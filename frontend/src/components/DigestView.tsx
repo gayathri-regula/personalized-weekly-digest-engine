@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { boostDigest, getDigest, submitFeedback } from "../api/client";
+import {
+  boostDigest,
+  getDigest,
+  getSavedItems,
+  saveItem,
+  submitFeedback,
+  unsaveItem,
+} from "../api/client";
 import { Digest, DigestItem, User } from "../types";
 import { groupDigestItems } from "../utils/groupDigestItems";
 import { CategoryHighlights } from "./CategoryHighlights";
@@ -41,11 +48,31 @@ export const DigestView: React.FC<DigestViewProps> = ({
   // Client-side save / bookmark state map: activityItemId -> boolean
   const [savedItemIds, setSavedItemIds] = useState<Record<string, boolean>>({});
 
-  const toggleSaveItem = (itemId: string) => {
+  const toggleSaveItem = async (itemId: string) => {
+    if (!user) return;
+    const isCurrentlySaved = !!savedItemIds[itemId];
+    const nextSavedState = !isCurrentlySaved;
+
+    // Optimistically update local UI state immediately
     setSavedItemIds((prev) => ({
       ...prev,
-      [itemId]: !prev[itemId],
+      [itemId]: nextSavedState,
     }));
+
+    try {
+      if (nextSavedState) {
+        await saveItem(user.id, itemId);
+      } else {
+        await unsaveItem(user.id, itemId);
+      }
+    } catch (err: unknown) {
+      console.error("Failed to persist save state:", err);
+      // Rollback local state on error
+      setSavedItemIds((prev) => ({
+        ...prev,
+        [itemId]: isCurrentlySaved,
+      }));
+    }
   };
 
   useEffect(() => {
@@ -58,6 +85,7 @@ export const DigestView: React.FC<DigestViewProps> = ({
 
     if (!user) {
       setDigest(null);
+      setSavedItemIds({});
       setIsNotFound(false);
       setErrorMessage(null);
       return;
@@ -148,6 +176,31 @@ export const DigestView: React.FC<DigestViewProps> = ({
       setFeedbackState({});
     }
   }, [digest]);
+
+  // Synchronize savedItemIds from backend when user or digest loads or updates
+  useEffect(() => {
+    if (user && digest) {
+      let isSubscribed = true;
+      getSavedItems(user.id)
+        .then((savedItems) => {
+          if (!isSubscribed) return;
+          const savedMap: Record<string, boolean> = {};
+          savedItems.forEach((s) => {
+            savedMap[s.activity_item_id] = true;
+          });
+          setSavedItemIds(savedMap);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch saved items for digest sync:", err);
+        });
+
+      return () => {
+        isSubscribed = false;
+      };
+    } else {
+      setSavedItemIds({});
+    }
+  }, [user, digest]);
 
   const handleFeedbackClick = async (
     activityItemId: string,
