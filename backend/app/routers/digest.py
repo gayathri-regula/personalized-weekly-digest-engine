@@ -120,10 +120,12 @@ async def generate_user_digest(
     week_id = get_week_identifier(ref_now)
     actual_generation_time = datetime.now(timezone.utc)
 
-    # 2. Generate 5 AI activity items for this user (60/40 interest/explore ratio)
+    # 2. Generate AI activity items for this user (respecting content_length preference)
+    target_count = 3 if user.content_length == "brief" else 5
     raw_ai_items = generate_ai_digest_items(
         user_name=user.name,
         interest_tags=user.interest_tags or [],
+        target_count=target_count,
         use_llm=True,
     )
 

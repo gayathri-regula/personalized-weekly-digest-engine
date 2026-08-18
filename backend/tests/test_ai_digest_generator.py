@@ -186,3 +186,32 @@ def test_fallback_generator_many_tags_sampling_spread(tags):
     assert has_tag_beyond_first_3, f"Tailored tags {tailored_tags} did not sample beyond first 3 user tags {first_3_user_tags}"
 
 
+@pytest.mark.parametrize(
+    "tags",
+    [
+        ["AI"],  # 1 tag case
+        ["AI", "Python"],  # 2 tags case
+        ["AI", "Cloud", "Security"],  # 3 tags case
+        ["AI", "Machine Learning", "Python", "JavaScript", "Cloud"],  # 5 tags case
+        [],  # Empty tag case
+    ],
+)
+def test_fallback_generator_3_items_zero_duplicate_pairs(tags):
+    """Verify 3-item fallback mode returns 3 items with 2 interest + 1 exploratory and 0 duplicate pairs."""
+    items = generate_fallback_ai_digest_items("Alice Chen", tags, target_count=3)
+    assert len(items) == 3
+
+    # Check position rankings
+    for idx, item in enumerate(items, start=1):
+        assert item["rank_position"] == idx
+
+    # Check zero duplicate (title, content) pairs across all 3 items
+    pairs = [(item["title"], item["content"]) for item in items]
+    unique_pairs = set(pairs)
+    assert len(unique_pairs) == 3, f"Duplicate pairs detected in 3-item mode for tags {tags}: {pairs}"
+
+    # Item 3 must be exploratory
+    assert "Exploratory update" in items[2]["explanation_text"]
+
+
+

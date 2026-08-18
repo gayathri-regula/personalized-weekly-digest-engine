@@ -1,6 +1,6 @@
 """SQLAlchemy ORM model for User entity."""
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 from sqlalchemy import JSON, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
@@ -19,7 +19,17 @@ class User(Base):
     # Using SQLAlchemy JSON column type to store interest_tags as a list of strings,
     # providing cross-database compatibility while leveraging native JSON support in PostgreSQL.
     interest_tags: Mapped[List[str]] = mapped_column(JSON, nullable=False)
+    digest_frequency: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True, default="weekly"
+    )
+    content_length: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True, default="detailed"
+    )
+    digest_language: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True, default="en"
+    )
 
     digests: Mapped[List["Digest"]] = relationship(
         "Digest", back_populates="user", cascade="all, delete-orphan"
     )
+

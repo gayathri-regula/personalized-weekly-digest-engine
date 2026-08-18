@@ -97,6 +97,7 @@ export const App: React.FC = () => {
                   onOpenDrawer={() => setIsDrawerOpen(true)}
                   onOpenEditInterests={() => setIsDrawerOpen(true)}
                   onShowToast={showToast}
+                  onUserUpdated={(updatedUser) => setSelectedUser(updatedUser)}
                 />
               )}
             </section>

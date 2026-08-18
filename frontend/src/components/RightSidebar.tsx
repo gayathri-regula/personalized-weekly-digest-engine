@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getActivityLog } from "../api/client";
+import { getActivityLog, updateUserPreferences } from "../api/client";
 import { ActivityLogEntry, Digest, User } from "../types";
 
 interface RightSidebarProps {
@@ -7,6 +7,7 @@ interface RightSidebarProps {
   digest: Digest | null;
   onOpenEditInterests: () => void;
   onShowToast: (message: string) => void;
+  onUserUpdated?: (updatedUser: User) => void;
 }
 
 export const RightSidebar: React.FC<RightSidebarProps> = ({
@@ -14,9 +15,53 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   digest,
   onOpenEditInterests,
   onShowToast,
+  onUserUpdated,
 }) => {
   const [recentActivities, setRecentActivities] = useState<ActivityLogEntry[]>([]);
   const [loadingActivity, setLoadingActivity] = useState<boolean>(false);
+
+  // Digest Preferences state
+  const [frequency, setFrequency] = useState<string>("weekly");
+  const [contentLength, setContentLength] = useState<string>("detailed");
+  const [language, setLanguage] = useState<string>("en");
+  const [savingPrefs, setSavingPrefs] = useState<boolean>(false);
+  const [prefError, setPrefError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      setFrequency(user.digest_frequency || "weekly");
+      setContentLength(user.content_length || "detailed");
+      setLanguage(user.digest_language || "en");
+    } else {
+      setFrequency("weekly");
+      setContentLength("detailed");
+      setLanguage("en");
+    }
+  }, [user]);
+
+  const handleSavePreferences = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || savingPrefs) return;
+
+    setSavingPrefs(true);
+    setPrefError(null);
+    try {
+      const updatedUser = await updateUserPreferences(user.id, {
+        digest_frequency: frequency,
+        content_length: contentLength,
+        digest_language: language,
+      });
+      if (onUserUpdated) {
+        onUserUpdated(updatedUser);
+      }
+      onShowToast("Digest preferences saved successfully.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save preferences.";
+      setPrefError(msg);
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -109,33 +154,70 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         )}
       </div>
 
-      {/* Panel 3: Digest Preferences (Visual Placeholder) */}
+      {/* Panel 3: Digest Preferences */}
       <div className="right-panel-card preferences-panel">
         <div className="right-panel-header">
           <span className="panel-header-icon">🎛️</span>
           <h3 className="panel-header-title">Digest Preferences</h3>
-          <span className="redesign-soon-badge">Soon</span>
         </div>
-        <div className="pref-fields-disabled">
+
+        {prefError && (
+          <div className="pref-error-text" style={{ fontSize: "0.75rem", color: "var(--error-color)", marginBottom: "0.5rem" }}>
+            ⚠️ {prefError}
+          </div>
+        )}
+
+        <form onSubmit={handleSavePreferences} className="pref-fields">
           <div className="pref-field-group">
             <label className="pref-label">Frequency</label>
-            <select disabled value="weekly" className="pref-select-disabled">
+            <select
+              disabled={!user || savingPrefs}
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value)}
+              className={user ? "pref-select" : "pref-select-disabled"}
+            >
+              <option value="daily">Daily</option>
               <option value="weekly">Weekly (Mondays)</option>
+              <option value="monthly">Monthly (1st of month)</option>
             </select>
+            <span className="pref-note-text">ℹ️ Affects future scheduled digests</span>
           </div>
+
           <div className="pref-field-group">
             <label className="pref-label">Content Length</label>
-            <select disabled value="medium" className="pref-select-disabled">
-              <option value="medium">Detailed Digest</option>
+            <select
+              disabled={!user || savingPrefs}
+              value={contentLength}
+              onChange={(e) => setContentLength(e.target.value)}
+              className={user ? "pref-select" : "pref-select-disabled"}
+            >
+              <option value="brief">Brief (3 stories)</option>
+              <option value="detailed">Detailed (5 stories)</option>
             </select>
           </div>
+
           <div className="pref-field-group">
             <label className="pref-label">Language</label>
-            <select disabled value="en" className="pref-select-disabled">
+            <select
+              disabled={!user || savingPrefs}
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className={user ? "pref-select" : "pref-select-disabled"}
+            >
               <option value="en">English (US)</option>
             </select>
           </div>
-        </div>
+
+          {user && (
+            <button
+              type="submit"
+              disabled={savingPrefs}
+              className="btn-save-prefs"
+            >
+              {savingPrefs ? "Saving..." : "Save Preferences"}
+            </button>
+          )}
+        </form>
       </div>
 
       {/* Panel 4: Share Your Digest (Visual Placeholder) */}

@@ -285,20 +285,21 @@ def sanitize_category_tags(raw_tags: Any, fallback_tag: str = "Technology") -> L
 
 
 def generate_fallback_ai_digest_items(
-    user_name: str, interest_tags: List[str]
+    user_name: str, interest_tags: List[str], target_count: int = 5
 ) -> List[Dict[str, Any]]:
-    """Generate 5 deterministic fallback items (3 interest-aligned + 2 open-ended exploratory).
+    """Generate deterministic fallback items (60/40 interest/exploratory ratio).
 
-    Guarantees zero duplicate (title, content) pairs across all 5 items, regardless of whether
+    Guarantees zero duplicate (title, content) pairs across all items, regardless of whether
     the user has 1, 2, 3, or 3+ interest tags specified. For >3 tags, samples evenly across the
     full list of interest tags to ensure representative topic coverage.
 
     Args:
         user_name: Display name of the target user.
         interest_tags: List of interest tags specified by the user.
+        target_count: Target number of items to generate (default 5).
 
     Returns:
-        List[Dict[str, Any]]: List of 5 dicts ready for ActivityItem and DigestItem creation.
+        List[Dict[str, Any]]: List of dicts ready for ActivityItem and DigestItem creation.
     """
     effective_tags = [t for t in interest_tags if t in INTEREST_TAXONOMY] if interest_tags else []
     if not effective_tags:
@@ -306,16 +307,27 @@ def generate_fallback_ai_digest_items(
 
     num_effective = len(effective_tags)
     ref_now = get_reference_now()
-    synthetic_scores = [0.95, 0.92, 0.89, 0.86, 0.83]
+
+    # Determine item distribution based on target_count
+    if target_count == 3:
+        num_interest = 2
+        num_exploratory = 1
+        synthetic_scores = [0.95, 0.90, 0.85]
+    else:
+        num_interest = max(1, round(target_count * 0.6))
+        num_exploratory = target_count - num_interest
+        synthetic_scores = [
+            round(0.95 - idx * (0.12 / max(1, target_count - 1)), 2)
+            for idx in range(target_count)
+        ]
 
     items: List[Dict[str, Any]] = []
 
-    # Items 1-3 (Positions 1-3): Interest-Aligned Slots with tag_usage_count variant cycling.
-    # For >3 tags, sample evenly across the full list instead of taking only the first 3.
+    # Interest-Aligned Slots with tag_usage_count variant cycling.
     tag_usage_count: Dict[str, int] = {}
-    for idx in range(3):
-        if num_effective > 3:
-            tag_idx = (idx * num_effective) // 3
+    for idx in range(num_interest):
+        if num_effective > num_interest:
+            tag_idx = (idx * num_effective) // num_interest
             tag = effective_tags[tag_idx]
         else:
             tag = effective_tags[idx % num_effective]
@@ -353,15 +365,16 @@ def generate_fallback_ai_digest_items(
             }
         )
 
-    # Items 4-5 (Positions 4-5): Distinct Open-Ended Exploratory Slots
+    # Distinct Open-Ended Exploratory Slots
     user_tag_set = set(interest_tags or [])
     available_exploratory = [
         exp for exp in EXPLORATORY_FALLBACK_TOPICS if exp["tag"] not in user_tag_set
     ]
-    if len(available_exploratory) < 2:
+    if len(available_exploratory) < num_exploratory:
         available_exploratory = EXPLORATORY_FALLBACK_TOPICS
 
-    for exp_idx, exp_topic in enumerate(available_exploratory[:2], start=3):
+    for exp_offset, exp_topic in enumerate(available_exploratory[:num_exploratory]):
+        exp_idx = num_interest + exp_offset
         items.append(
             {
                 "title": exp_topic["title"],
@@ -384,35 +397,51 @@ def generate_fallback_ai_digest_items(
     return items
 
 
-def build_ai_digest_prompt(user_name: str, interest_tags: List[str]) -> str:
-    """Construct prompt for Claude to generate 5 open-ended activity updates (60/40 interest/explore ratio).
+def build_ai_digest_prompt(
+    user_name: str, interest_tags: List[str], target_count: int = 5
+) -> str:
+    """Construct prompt for Claude to generate open-ended activity updates (60/40 interest/explore ratio).
 
     Args:
         user_name: Name of target user.
         interest_tags: List of interest tags specified by user.
+        target_count: Target number of items to generate (default 5).
 
     Returns:
-        str: Formatted prompt string for Claude API.
+        str: Formatted prompt string for LLM API.
     """
     tags_str = ", ".join(interest_tags) if interest_tags else "general technology"
     num_tags = len(interest_tags) if interest_tags else 0
 
-    if num_tags > 3:
+    if target_count == 3:
+        num_interest = 2
+        num_exploratory = 1
+    else:
+        num_interest = max(1, round(target_count * 0.6))
+        num_exploratory = target_count - num_interest
+
+    if num_tags > num_interest:
         tailored_instruction = (
-            f"Generate 3 updates covering a representative, diverse spread across {user_name}'s "
-            f"{num_tags} followed interest topics ({tags_str}). Do NOT limit items 1-3 to only the first few tags in the list."
+            f"Generate {num_interest} updates covering a representative, diverse spread across {user_name}'s "
+            f"{num_tags} followed interest topics ({tags_str}). Do NOT limit items 1-{num_interest} to only the first few tags in the list."
         )
     else:
         tailored_instruction = f"Generate updates directly tailored to {user_name}'s followed interest topics."
+
+    exp_range_str = (
+        f"ITEM {num_interest + 1}"
+        if num_exploratory == 1
+        else f"ITEMS {num_interest + 1}-{target_count}"
+    )
 
     return (
         f"You are an AI engineering curation assistant generating personalized technical activity updates for {user_name}.\n"
         f"{user_name} follows the following interest topics: {tags_str}.\n\n"
         "Instructions:\n"
-        "1. Generate EXACTLY 5 distinct, high-quality, professional technical activity updates.\n"
+        f"1. Generate EXACTLY {target_count} distinct, high-quality, professional technical activity updates.\n"
         "2. TOPIC DISTRIBUTION:\n"
-        f"   - ITEMS 1-3: {tailored_instruction}\n"
-        "   - ITEMS 4-5: Generate open-ended, exploratory updates introducing emerging technology breakthroughs, adjacent tools, or novel engineering paradigms OUTSIDE {user_name}'s explicitly followed topics to promote discovery.\n"
+        f"   - ITEMS 1-{num_interest}: {tailored_instruction}\n"
+        f"   - {exp_range_str}: Generate open-ended, exploratory updates introducing emerging technology breakthroughs, adjacent tools, or novel engineering paradigms OUTSIDE {user_name}'s explicitly followed topics to promote discovery.\n"
         "3. OPEN-ENDED CATEGORIES: Category tags and section titles are open-ended and NOT constrained to any fixed taxonomy list. Use precise, descriptive open-ended tags (e.g. 'Autonomous Agents', 'Vector Search', 'Edge Computing', 'Quantum Error Correction', 'Compiler Design').\n"
         "4. For each item, provide:\n"
         "   - 'title': A compelling, professional technical title.\n"
@@ -420,7 +449,7 @@ def build_ai_digest_prompt(user_name: str, interest_tags: List[str]) -> str:
         "   - 'category_tags': A JSON array of 1-2 concise, descriptive category tag strings.\n"
         "   - 'section_title': A clean 2-4 word UI section category header for grouping related items (e.g. 'AI & Autonomous Systems', 'Quantum Computing', 'Cloud & Platform Engineering').\n"
         "   - 'explanation_text': A truthful, human-readable rationale phrase explaining why this update was selected (e.g. 'Tailored to your interest in Python', 'Exploratory update: Emerging trend in Vector Databases'). Do NOT claim deterministic database matching or fake numerical calculations.\n"
-        "5. Return ONLY a valid JSON array of 5 objects. Do not include markdown codeblock wrappers, preambles, or conversational sign-offs.\n\n"
+        f"5. Return ONLY a valid JSON array of {target_count} objects. Do not include markdown codeblock wrappers, preambles, or conversational sign-offs.\n\n"
         'Example format:\n[\n  {\n    "title": "Architecting Autonomous AI Agents with Guardrails",\n    "content": "Explore modern patterns for multi-agent workflows combining state machines with LLM reasoning.",\n    "category_tags": ["AI Agents", "LLM Systems"],\n    "section_title": "AI & Autonomous Systems",\n    "explanation_text": "Tailored to your interest in AI"\n  }\n]'
     )
 
@@ -428,24 +457,26 @@ def build_ai_digest_prompt(user_name: str, interest_tags: List[str]) -> str:
 def call_llm_ai_digest_generator(
     user_name: str,
     interest_tags: List[str],
+    target_count: int = 5,
     client: Optional[Any] = None,
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
 ) -> List[Dict[str, Any]]:
-    """Execute API request to Groq LLM to generate 5 open-ended activity items.
+    """Execute API request to Groq LLM to generate target_count open-ended activity items.
 
     Args:
         user_name: Name of target user.
         interest_tags: List of interest tags.
+        target_count: Target number of items (default 5).
         client: Optional injected Groq client or mock client.
         timeout: API call timeout in seconds.
 
     Returns:
-        List[Dict[str, Any]]: List of 5 parsed and formatted activity item dicts.
+        List[Dict[str, Any]]: List of parsed and formatted activity item dicts.
 
     Raises:
         ValueError, RuntimeError, Exception: On API errors, auth failures, or unparseable output.
     """
-    prompt = build_ai_digest_prompt(user_name, interest_tags)
+    prompt = build_ai_digest_prompt(user_name, interest_tags, target_count=target_count)
 
     if client is None:
         api_key = os.getenv("GROQ_API_KEY")
@@ -484,13 +515,22 @@ def call_llm_ai_digest_generator(
             text_content = "\n".join(lines).strip()
 
         parsed = json.loads(text_content)
-        if isinstance(parsed, list) and len(parsed) >= 5:
+        if isinstance(parsed, list) and len(parsed) >= target_count:
             ref_now = get_reference_now()
-            synthetic_scores = [0.95, 0.92, 0.89, 0.86, 0.83]
+            if target_count == 3:
+                num_interest = 2
+                synthetic_scores = [0.95, 0.90, 0.85]
+            else:
+                num_interest = max(1, round(target_count * 0.6))
+                synthetic_scores = [
+                    round(0.95 - idx * (0.12 / max(1, target_count - 1)), 2)
+                    for idx in range(target_count)
+                ]
+
             fallback_primary_tag = interest_tags[0] if interest_tags else "Technology"
 
             results = []
-            for idx, raw in enumerate(parsed[:5], start=1):
+            for idx, raw in enumerate(parsed[:target_count], start=1):
                 raw_tags = raw.get("category_tags", [])
                 valid_tags = sanitize_category_tags(raw_tags, fallback_primary_tag)
                 section_title = str(
@@ -499,7 +539,7 @@ def call_llm_ai_digest_generator(
 
                 default_explanation = (
                     f"Tailored to your interest in {valid_tags[0]}"
-                    if idx <= 3
+                    if idx <= num_interest
                     else f"Exploratory topic: Emerging trend in {valid_tags[0]}"
                 )
 
@@ -525,37 +565,40 @@ def call_llm_ai_digest_generator(
                 )
             return results
 
-    raise RuntimeError("Groq API response did not contain 5 valid generated item objects.")
+    raise RuntimeError(f"Groq API response did not contain {target_count} valid generated item objects.")
 
 
 def generate_ai_digest_items(
     user_name: str,
     interest_tags: List[str],
+    target_count: int = 5,
     use_llm: bool = True,
     client: Optional[Any] = None,
 ) -> List[Dict[str, Any]]:
-    """Generate 5 AI activity items for a user's digest (60/40 interest/explore ratio).
+    """Generate AI activity items for a user's digest (60/40 interest/explore ratio).
 
-    Primary path calls Anthropic Claude API. Fallback path produces synthetic
+    Primary path calls Groq LLM API. Fallback path produces synthetic
     activity items if LLM is disabled or fails.
 
     Args:
         user_name: Display name of target user.
         interest_tags: List of interest tags specified by user.
+        target_count: Target number of items (default 5).
         use_llm: Whether to attempt LLM generation (default True).
         client: Optional injected client or mock client.
 
     Returns:
-        List[Dict[str, Any]]: List of 5 generated item dictionaries.
+        List[Dict[str, Any]]: List of generated item dictionaries.
     """
     if use_llm:
         try:
             items = call_llm_ai_digest_generator(
                 user_name=user_name,
                 interest_tags=interest_tags,
+                target_count=target_count,
                 client=client,
             )
-            if items and len(items) == 5:
+            if items and len(items) == target_count:
                 return items
         except Exception as exc:
             logger.warning(
@@ -564,4 +607,4 @@ def generate_ai_digest_items(
                 exc,
             )
 
-    return generate_fallback_ai_digest_items(user_name, interest_tags)
+    return generate_fallback_ai_digest_items(user_name, interest_tags, target_count=target_count)

@@ -8,6 +8,7 @@ import {
   SavedItemDetail,
   SavedItemResponse,
   User,
+  UserPreferencesPayload,
   UsersListResponse,
 } from "../types";
 
@@ -152,6 +153,43 @@ export async function updateUserInterests(
     }
     throw new ApiError(
       "Backend server unreachable during profile update. Please try again.",
+      0
+    );
+  }
+}
+
+/**
+ * Update digest preferences (frequency, content length, language) for an existing user profile.
+ */
+export async function updateUserPreferences(
+  userId: string,
+  prefs: UserPreferencesPayload
+): Promise<User> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users/${userId}/preferences`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(prefs),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(
+        `Failed to update digest preferences: ${detail}`,
+        response.status
+      );
+    }
+    const updatedUser: User = await response.json();
+    return updatedUser;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Backend server unreachable during preference update. Please try again.",
       0
     );
   }

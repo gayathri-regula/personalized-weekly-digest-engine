@@ -6,6 +6,15 @@ export interface User {
   id: string;
   name: string;
   interest_tags: string[];
+  digest_frequency?: string;
+  content_length?: string;
+  digest_language?: string;
+}
+
+export interface UserPreferencesPayload {
+  digest_frequency?: string;
+  content_length?: string;
+  digest_language?: string;
 }
 
 export interface UsersListResponse {

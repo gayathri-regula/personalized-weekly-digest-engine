@@ -20,6 +20,7 @@ interface DigestViewProps {
   onOpenDrawer: () => void;
   onOpenEditInterests: () => void;
   onShowToast: (message: string) => void;
+  onUserUpdated?: (updatedUser: User) => void;
 }
 
 export const DigestView: React.FC<DigestViewProps> = ({
@@ -27,6 +28,7 @@ export const DigestView: React.FC<DigestViewProps> = ({
   onOpenDrawer,
   onOpenEditInterests,
   onShowToast,
+  onUserUpdated,
 }) => {
   const [digest, setDigest] = useState<Digest | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -424,6 +426,7 @@ export const DigestView: React.FC<DigestViewProps> = ({
         digest={digest}
         onOpenEditInterests={onOpenEditInterests}
         onShowToast={onShowToast}
+        onUserUpdated={onUserUpdated}
       />
     </div>
   );

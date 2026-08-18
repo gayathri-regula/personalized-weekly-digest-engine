@@ -3003,6 +3003,64 @@
   cursor: not-allowed;
 }
 
+.pref-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pref-select {
+  background: #ffffff;
+  border: 1px solid var(--bg-card-border);
+  color: var(--text-main);
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.pref-select:focus {
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.pref-note-text {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 0.15rem;
+}
+
+.btn-save-prefs {
+  margin-top: 0.35rem;
+  background: var(--primary-gradient);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-save-prefs:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.btn-save-prefs:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .share-input-row {
   display: flex;
   flex-direction: column;
