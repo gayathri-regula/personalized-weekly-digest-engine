@@ -28,6 +28,9 @@ class User(Base):
     digest_language: Mapped[Optional[str]] = mapped_column(
         String, nullable=True, default="en"
     )
+    share_token: Mapped[Optional[str]] = mapped_column(
+        String, unique=True, nullable=True
+    )
 
     digests: Mapped[List["Digest"]] = relationship(
         "Digest", back_populates="user", cascade="all, delete-orphan"

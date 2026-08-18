@@ -1,7 +1,8 @@
 """FastAPI router for user endpoints."""
 
+import secrets
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,6 +10,7 @@ from app.constants import INTEREST_TAXONOMY
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import (
+    ShareLinkResponse,
     UserCreate,
     UserResponse,
     UserUpdateInterest,
@@ -206,3 +208,48 @@ async def update_user_preferences(
     await db.refresh(user)
 
     return _build_user_response(user)
+
+
+@router.post("/{user_id}/share", response_model=ShareLinkResponse)
+async def generate_user_share_link(
+    user_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> ShareLinkResponse:
+    """Generate (or retrieve existing) unique share token and public URL for a user's digest."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User '{user_id}' not found.",
+        )
+
+    if not user.share_token:
+        token = secrets.token_urlsafe(16)
+        existing = await db.execute(select(User).where(User.share_token == token))
+        while existing.scalar_one_or_none() is not None:
+            token = secrets.token_urlsafe(16)
+            existing = await db.execute(select(User).where(User.share_token == token))
+
+        user.share_token = token
+        await db.commit()
+        await db.refresh(user)
+
+    origin = request.headers.get("origin") or request.headers.get("referer")
+    if origin:
+        origin_clean = origin.rstrip("/")
+        if "://" in origin_clean:
+            parts = origin_clean.split("/")
+            base = f"{parts[0]}//{parts[2]}"
+        else:
+            base = origin_clean
+        share_url = f"{base}/share/{user.share_token}"
+    else:
+        share_url = f"http://localhost:5173/share/{user.share_token}"
+
+    return ShareLinkResponse(
+        share_token=user.share_token,
+        share_url=share_url,
+    )
+

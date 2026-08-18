@@ -77,3 +77,11 @@ class InterestsResponse(BaseModel):
     """Schema for returning domain interest taxonomy."""
 
     interests: List[str] = Field(..., description="Available taxonomy interest tags")
+
+
+class ShareLinkResponse(BaseModel):
+    """Schema representing a user's generated public share link."""
+
+    share_token: str = Field(..., description="Unique opaque share token for the user")
+    share_url: str = Field(..., description="Full public shareable URL")
+

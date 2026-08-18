@@ -113,3 +113,31 @@ export interface ActivityLogListResponse {
   total: number;
 }
 
+export interface ShareLinkResponse {
+  share_token: string;
+  share_url: string;
+}
+
+export interface SharedDigestItem {
+  id: string;
+  activity_item_id: string;
+  title: string;
+  content: string;
+  category_tags: string[];
+  section_title?: string | null;
+  relevance_score: number;
+  explanation_text: string;
+  rank_position: number;
+  created_at?: string | null;
+}
+
+export interface SharedDigest {
+  user_name: string;
+  week_identifier: string;
+  generated_at: string;
+  summary_prose: string;
+  items: SharedDigestItem[];
+  ai_suggestions?: AISuggestion[];
+}
+
+

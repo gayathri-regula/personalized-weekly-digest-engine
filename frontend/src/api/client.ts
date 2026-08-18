@@ -7,6 +7,8 @@ import {
   InterestsResponse,
   SavedItemDetail,
   SavedItemResponse,
+  ShareLinkResponse,
+  SharedDigest,
   User,
   UserPreferencesPayload,
   UsersListResponse,
@@ -456,5 +458,64 @@ export async function getActivityLog(
     );
   }
 }
+
+/**
+ * Generate (or retrieve existing) unique public share link for a user profile.
+ */
+export async function getOrCreateShareLink(
+  userId: string
+): Promise<ShareLinkResponse> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users/${userId}/share`, {
+      method: "POST",
+    });
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(
+        `Failed to generate share link: ${detail}`,
+        response.status
+      );
+    }
+    const data: ShareLinkResponse = await response.json();
+    return data;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Backend server unreachable during share link generation. Please try again.",
+      0
+    );
+  }
+}
+
+/**
+ * Fetch public read-only shared digest by token.
+ */
+export async function getSharedDigest(token: string): Promise<SharedDigest> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/share/${token}`);
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(
+        detail,
+        response.status
+      );
+    }
+    const data: SharedDigest = await response.json();
+    return data;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Unable to connect to backend server. Please verify backend service is running.",
+      0
+    );
+  }
+}
+
 
 

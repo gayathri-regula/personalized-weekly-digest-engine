@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getActivityLog, updateUserPreferences } from "../api/client";
+import { getActivityLog, getOrCreateShareLink, updateUserPreferences } from "../api/client";
 import { ActivityLogEntry, Digest, User } from "../types";
 
 interface RightSidebarProps {
@@ -26,18 +26,49 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   const [language, setLanguage] = useState<string>("en");
   const [savingPrefs, setSavingPrefs] = useState<boolean>(false);
   const [prefError, setPrefError] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string>("");
+  const [copyingShare, setCopyingShare] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
       setFrequency(user.digest_frequency || "weekly");
       setContentLength(user.content_length || "detailed");
       setLanguage(user.digest_language || "en");
+      setShareUrl("");
     } else {
       setFrequency("weekly");
       setContentLength("detailed");
       setLanguage("en");
+      setShareUrl("");
     }
   }, [user]);
+
+  const handleCopyShareLink = async () => {
+    if (!user || copyingShare) return;
+    setCopyingShare(true);
+    try {
+      const res = await getOrCreateShareLink(user.id);
+      const fullUrl = `${window.location.origin}/share/${res.share_token}`;
+      setShareUrl(fullUrl);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(fullUrl);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = fullUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      onShowToast("Share link copied to clipboard!");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to generate share link.";
+      onShowToast(`⚠️ ${msg}`);
+    } finally {
+      setCopyingShare(false);
+    }
+  };
+
 
   const handleSavePreferences = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,7 +251,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         </form>
       </div>
 
-      {/* Panel 4: Share Your Digest (Visual Placeholder) */}
+      {/* Panel 4: Share Your Digest */}
       <div className="right-panel-card share-panel">
         <div className="right-panel-header">
           <span className="panel-header-icon">🔗</span>
@@ -230,19 +261,24 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         <div className="share-input-row">
           <input
             type="text"
-            className="share-link-input-disabled"
-            value="https://digest.sfcollab.internal/d/preview"
-            disabled
+            className={user ? "share-link-input" : "share-link-input-disabled"}
+            value={
+              shareUrl
+                ? shareUrl
+                : user
+                ? "Click 'Copy Link' to generate URL"
+                : "Select a user to generate link"
+            }
+            disabled={!user}
             readOnly
           />
           <button
             type="button"
-            className="btn-copy-share-disabled"
-            onClick={() =>
-              onShowToast("This feature is scheduled for a future update.")
-            }
+            className={user ? "btn-copy-share" : "btn-copy-share-disabled"}
+            disabled={!user || copyingShare}
+            onClick={handleCopyShareLink}
           >
-            Copy Link
+            {copyingShare ? "Copying..." : "Copy Link"}
           </button>
         </div>
       </div>

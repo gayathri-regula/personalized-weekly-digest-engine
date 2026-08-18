@@ -3,12 +3,22 @@ import { ActivityHistoryView } from "./components/ActivityHistoryView";
 import { DigestView } from "./components/DigestView";
 import { LeftSidebar } from "./components/LeftSidebar";
 import { SavedItemsView } from "./components/SavedItemsView";
+import { SharedDigestView } from "./components/SharedDigestView";
 import { SideDrawer } from "./components/SideDrawer";
 import { TopHeader } from "./components/TopHeader";
 import { User } from "./types";
 import "./App.css";
 
 export const App: React.FC = () => {
+  // Check if current browser URL is a public share link (/share/{token})
+  const pathname = window.location.pathname;
+  const shareMatch = pathname.match(/^\/share\/([^/]+)/);
+
+  if (shareMatch) {
+    const shareToken = shareMatch[1];
+    return <SharedDigestView token={shareToken} />;
+  }
+
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [userRefreshKey, setUserRefreshKey] = useState<number>(0);

@@ -103,7 +103,7 @@ export const HeroDigestCard: React.FC<HeroDigestCardProps> = ({
 /**
  * Reused inline markdown rendering logic for prose summary.
  */
-function renderMarkdownProse(prose: string) {
+export function renderMarkdownProse(prose: string) {
   if (!prose) return null;
 
   const lines = prose.split("\n");
@@ -177,7 +177,7 @@ function renderMarkdownProse(prose: string) {
   return <div className="prose-wrapper">{elements}</div>;
 }
 
-function parseInlineFormatting(text: string): React.ReactNode[] {
+export function parseInlineFormatting(text: string): React.ReactNode[] {
   const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
   return parts.map((part, index) => {
     if (part.startsWith("**") && part.endsWith("**")) {

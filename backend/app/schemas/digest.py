@@ -81,3 +81,56 @@ class DigestResponse(BaseModel):
     )
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class SharedDigestItemResponse(BaseModel):
+    """Schema representing a read-only activity item within a public shared digest response."""
+
+    id: str = Field(..., description="DigestItem row ID")
+    activity_item_id: str = Field(..., description="Activity item ID")
+    title: str = Field(..., description="Activity item title")
+    content: str = Field(..., description="Activity item content")
+    category_tags: List[str] = Field(
+        default_factory=list, description="Category tags for the activity item"
+    )
+    section_title: Optional[str] = Field(
+        default=None, description="Clean UI section category header for grouping related items"
+    )
+    relevance_score: float = Field(
+        ..., description="Computed relevance score (0.0 to 1.0)"
+    )
+    explanation_text: str = Field(
+        ..., description="Truthful explanation text for why item was selected"
+    )
+    rank_position: int = Field(
+        ..., description="1-indexed rank position in the digest"
+    )
+    created_at: Optional[datetime] = Field(
+        default=None, description="Item creation timestamp"
+    )
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SharedDigestResponse(BaseModel):
+    """Schema representing a public, read-only digest payload returned by /api/share/{token}."""
+
+    user_name: str = Field(..., description="Full name of the user whose digest is shared")
+    week_identifier: str = Field(
+        ..., description="ISO week identifier (e.g. 2026-W30)"
+    )
+    generated_at: datetime = Field(
+        ..., description="Timestamp when digest was generated"
+    )
+    summary_prose: str = Field(
+        ..., description="Executive summary prose text"
+    )
+    items: List[SharedDigestItemResponse] = Field(
+        default_factory=list, description="Top-ranked items for this shared digest"
+    )
+    ai_suggestions: List[AISuggestion] = Field(
+        default_factory=list, description="AI-generated exploratory topic suggestions"
+    )
+
+    model_config = ConfigDict(from_attributes=True)
+

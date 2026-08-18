@@ -10,6 +10,7 @@ from app.routers.digest import router as digest_router
 from app.routers.feedback import router as feedback_router
 from app.routers.interests import router as interests_router
 from app.routers.saved import router as saved_router
+from app.routers.share import router as share_router
 from app.routers.users import router as users_router
 
 # Load environment variables from .env file if present
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
     application.include_router(feedback_router, prefix="/api")
     application.include_router(interests_router, prefix="/api")
     application.include_router(saved_router, prefix="/api")
+    application.include_router(share_router, prefix="/api")
     application.include_router(users_router, prefix="/api")
 
     @application.exception_handler(Exception)
