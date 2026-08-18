@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { getActivityLog, getOrCreateShareLink, updateUserPreferences } from "../api/client";
+import React, { useEffect, useRef, useState } from "react";
+import { getActivityLog, getDigestVoice, getOrCreateShareLink, updateUserPreferences } from "../api/client";
 import { ActivityLogEntry, Digest, User } from "../types";
 
 interface RightSidebarProps {
@@ -29,7 +29,25 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   const [shareUrl, setShareUrl] = useState<string>("");
   const [copyingShare, setCopyingShare] = useState<boolean>(false);
 
+  // Voice Digest audio state
+  const [loadingVoice, setLoadingVoice] = useState<boolean>(false);
+  const [isPlayingVoice, setIsPlayingVoice] = useState<boolean>(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+
   useEffect(() => {
+    // Reset and cleanup audio when selected user or digest changes
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+    setIsPlayingVoice(false);
+    setLoadingVoice(false);
+
     if (user) {
       setFrequency(user.digest_frequency || "weekly");
       setContentLength(user.content_length || "detailed");
@@ -41,7 +59,63 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
       setLanguage("en");
       setShareUrl("");
     }
-  }, [user]);
+  }, [user, digest]);
+
+  const handlePlayVoiceDigest = async () => {
+    if (!user) {
+      onShowToast("Please select a user profile to play Voice Digest.");
+      return;
+    }
+    if (!digest) {
+      onShowToast("No weekly digest compiled yet for this user.");
+      return;
+    }
+
+    if (isPlayingVoice && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlayingVoice(false);
+      return;
+    }
+
+    if (audioRef.current && audioUrlRef.current) {
+      audioRef.current
+        .play()
+        .then(() => setIsPlayingVoice(true))
+        .catch((err: Error) => {
+          onShowToast(`⚠️ Audio playback error: ${err.message}`);
+        });
+      return;
+    }
+
+    setLoadingVoice(true);
+    try {
+      const blob = await getDigestVoice(user.id);
+      const url = URL.createObjectURL(blob);
+      audioUrlRef.current = url;
+
+      const audio = new Audio(url);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        setIsPlayingVoice(false);
+      };
+
+      audio.onerror = () => {
+        setIsPlayingVoice(false);
+        onShowToast("⚠️ Failed to play audio stream.");
+      };
+
+      await audio.play();
+      setIsPlayingVoice(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to generate Voice Digest.";
+      onShowToast(`⚠️ ${msg}`);
+      setIsPlayingVoice(false);
+    } finally {
+      setLoadingVoice(false);
+    }
+  };
+
 
   const handleCopyShareLink = async () => {
     if (!user || copyingShare) return;
@@ -139,18 +213,36 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             : "Select a user profile to load or compile their latest weekly digest."}
         </p>
 
-        {/* Play Voice Digest (Visual Placeholder) */}
+        {/* Play Voice Digest */}
         <button
           type="button"
-          className="btn-voice-digest-placeholder"
-          onClick={() =>
-            onShowToast("This feature is scheduled for a future update.")
+          className={
+            loadingVoice
+              ? "btn-voice-digest loading"
+              : isPlayingVoice
+              ? "btn-voice-digest playing"
+              : "btn-voice-digest"
           }
-          title="Play Voice Digest (Coming Soon)"
+          onClick={handlePlayVoiceDigest}
+          disabled={!user || !digest || loadingVoice}
+          title={
+            !user
+              ? "Select a user profile"
+              : !digest
+              ? "No digest available"
+              : "Play Voice Digest Executive Summary"
+          }
         >
-          <span className="voice-play-icon">▶</span>
-          <span>Play Voice Digest</span>
-          <span className="redesign-soon-badge">Soon</span>
+          <span className="voice-play-icon">
+            {loadingVoice ? "⏳" : isPlayingVoice ? "⏸" : "▶"}
+          </span>
+          <span>
+            {loadingVoice
+              ? "Generating Audio..."
+              : isPlayingVoice
+              ? "Pause Voice Digest"
+              : "Play Voice Digest"}
+          </span>
         </button>
       </div>
 

@@ -517,5 +517,32 @@ export async function getSharedDigest(token: string): Promise<SharedDigest> {
   }
 }
 
+/**
+ * Fetch Voice Digest TTS MP3 audio blob for a user's latest digest.
+ */
+export async function getDigestVoice(userId: string): Promise<Blob> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/digest/${userId}/voice`);
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(
+        `Failed to generate Voice Digest: ${detail}`,
+        response.status
+      );
+    }
+    return await response.blob();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Unable to connect to backend server during Voice Digest generation.",
+      0
+    );
+  }
+}
+
+
 
 

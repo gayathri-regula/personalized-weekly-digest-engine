@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 from uuid import uuid4
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +25,7 @@ from app.services.ai_digest_generator import generate_ai_digest_items
 from app.services.ai_suggestions import generate_ai_suggestions
 from app.services.activity_logger import log_user_activity
 from app.services.summarizer import generate_digest_summary
+from app.services.voice_generator import generate_voice_digest
 from app.utils import get_reference_now, get_week_identifier
 
 router = APIRouter(prefix="/digest", tags=["digest"])
@@ -274,6 +275,53 @@ async def generate_user_digest(
         summary_prose=summary_prose,
         items=response_items,
         ai_suggestions=[AISuggestion(**s) for s in (digest_obj.ai_suggestions or [])],
+    )
+
+
+@router.get("/{user_id}/voice")
+async def get_user_digest_voice(
+    user_id: str, db: AsyncSession = Depends(get_db)
+) -> Response:
+    """Generate and stream MP3 TTS audio of a user's latest digest executive summary prose."""
+    user_result = await db.execute(select(User).where(User.id == user_id))
+    user = user_result.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User '{user_id}' not found",
+        )
+
+    digest_stmt = (
+        select(Digest)
+        .where(Digest.user_id == user_id)
+        .order_by(Digest.generated_at.desc())
+    )
+    digest_result = await db.execute(digest_stmt)
+    digest_obj = digest_result.scalars().first()
+
+    if digest_obj is None or not digest_obj.summary_prose:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No digest found for user '{user_id}'",
+        )
+
+    try:
+        audio_bytes = generate_voice_digest(digest_obj.summary_prose)
+    except ValueError as val_err:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(val_err),
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Voice digest generation failed: {exc}",
+        )
+
+    return Response(
+        content=audio_bytes,
+        media_type="audio/wav",
+        headers={"Content-Disposition": f"inline; filename=digest_voice_{user_id}.wav"},
     )
 
 

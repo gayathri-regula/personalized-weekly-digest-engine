@@ -23,7 +23,7 @@ const NAV_ITEMS: NavItemDef[] = [
   { key: "sources", label: "Sources", icon: "📡", isFunctional: false },
   { key: "saved", label: "Saved", icon: "🔖", isFunctional: true },
   { key: "history", label: "History", icon: "🕒", isFunctional: true },
-  { key: "voice-digest", label: "Voice Digest", icon: "🎙️", isFunctional: false },
+  { key: "voice-digest", label: "Voice Digest", icon: "🎙️", isFunctional: true },
   { key: "settings", label: "Settings", icon: "⚙️", isFunctional: false },
   { key: "feedback", label: "Feedback", icon: "💬", isFunctional: false },
 ];
