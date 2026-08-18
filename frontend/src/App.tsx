@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ActivityHistoryView } from "./components/ActivityHistoryView";
 import { DigestView } from "./components/DigestView";
-import { LeftSidebar } from "./components/LeftSidebar";
+import { NavDrawer } from "./components/NavDrawer";
 import { SavedItemsView } from "./components/SavedItemsView";
 import { SharedDigestView } from "./components/SharedDigestView";
 import { SideDrawer } from "./components/SideDrawer";
@@ -21,6 +21,7 @@ export const App: React.FC = () => {
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isNavDrawerOpen, setIsNavDrawerOpen] = useState<boolean>(false);
   const [userRefreshKey, setUserRefreshKey] = useState<number>(0);
   const [activeNav, setActiveNav] = useState<string>("dashboard");
 
@@ -70,25 +71,17 @@ export const App: React.FC = () => {
 
       {/* Main Dashboard Layout Container */}
       <div className="redesign-dashboard-layout">
-        {/* Left Sidebar Navigation */}
-        <LeftSidebar
-          selectedUser={selectedUser}
-          activeNav={activeNav}
-          onNavSelect={handleNavSelect}
-          onOpenDrawer={() => setIsDrawerOpen(true)}
-          onShowToast={showToast}
-        />
-
         {/* Main Content Area */}
         <main className="redesign-main-content">
           <div className="redesign-content-container">
-            {/* Top Greeting Header */}
+            {/* Top Header */}
             <TopHeader
               user={selectedUser}
+              onOpenNavDrawer={() => setIsNavDrawerOpen(true)}
               onOpenDrawer={() => setIsDrawerOpen(true)}
             />
 
-            {/* Redesigned Main Digest / Saved / History Display Area */}
+            {/* Main Content View Display Area */}
             <section className="digest-display-area">
               {activeNav === "saved" ? (
                 <SavedItemsView
@@ -114,7 +107,17 @@ export const App: React.FC = () => {
         </main>
       </div>
 
-      {/* Side Drawer Component */}
+      {/* Slide-out Navigation Menu Drawer */}
+      <NavDrawer
+        isOpen={isNavDrawerOpen}
+        onClose={() => setIsNavDrawerOpen(false)}
+        activeNav={activeNav}
+        onNavSelect={handleNavSelect}
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+        onShowToast={showToast}
+      />
+
+      {/* Profile & Interests Side Drawer */}
       <SideDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}

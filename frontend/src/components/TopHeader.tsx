@@ -3,34 +3,41 @@ import { User } from "../types";
 
 interface TopHeaderProps {
   user: User | null;
+  onOpenNavDrawer: () => void;
   onOpenDrawer: () => void;
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
   user,
+  onOpenNavDrawer,
   onOpenDrawer,
 }) => {
-  const getGreetingTime = (): string => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
-  };
-
   const firstName = user ? user.name.split(" ")[0] : "Guest";
-  const greeting = `${getGreetingTime()}, ${firstName}`;
 
   return (
     <header className="redesign-top-header">
-      {/* Greeting Title */}
-      <div className="redesign-header-greeting">
-        <h1 className="redesign-greeting-title">{greeting} 👋</h1>
-        <p className="redesign-greeting-sub">
-          Here is your personalized AI activity digest overview.
-        </p>
+      {/* Left Section: Hamburger Icon + Brand Logo */}
+      <div className="redesign-header-left">
+        <button
+          type="button"
+          className="btn-hamburger-menu"
+          onClick={onOpenNavDrawer}
+          title="Open Navigation Menu"
+          aria-label="Open Navigation Menu"
+        >
+          ☰
+        </button>
+
+        <div className="redesign-header-brand">
+          <span className="redesign-brand-icon">⚡</span>
+          <div className="redesign-brand-titles">
+            <span className="redesign-brand-name">SFCollab Digest</span>
+            <span className="redesign-brand-sub">AI Digest Engine</span>
+          </div>
+        </div>
       </div>
 
-      {/* Right Controls (Profile Avatar) */}
+      {/* Right Controls (Profile Avatar Button) */}
       <div className="redesign-header-controls">
         <button
           type="button"
@@ -49,4 +56,3 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     </header>
   );
 };
-

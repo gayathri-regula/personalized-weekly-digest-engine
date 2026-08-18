@@ -232,7 +232,7 @@ export const DigestView: React.FC<DigestViewProps> = ({
             <div className="placeholder-icon">👤</div>
             <h3>No User Profile Selected</h3>
             <p>
-              Please select a user profile from the left sidebar or controls above to view their weekly digest.
+              Please select a user profile using the menu or controls above to view their weekly digest.
             </p>
             <button
               type="button"
