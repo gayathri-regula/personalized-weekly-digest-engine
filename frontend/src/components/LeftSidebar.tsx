@@ -22,9 +22,7 @@ const NAV_ITEMS: NavItemDef[] = [
   { key: "saved", label: "Saved", icon: "🔖", isFunctional: true },
   { key: "history", label: "History", icon: "🕒", isFunctional: true },
   { key: "voice-digest", label: "Voice Digest", icon: "🎙️", isFunctional: true },
-  { key: "settings", label: "Settings", icon: "⚙️", isFunctional: false },
-  { key: "feedback", label: "Feedback", icon: "💬", isFunctional: false },
-];
+]
 
 export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   selectedUser,
@@ -93,9 +91,8 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               <li key={item.key}>
                 <button
                   type="button"
-                  className={`redesign-nav-btn ${isActive ? "active" : ""} ${
-                    !item.isFunctional ? "is-placeholder" : ""
-                  }`}
+                  className={`redesign-nav-btn ${isActive ? "active" : ""} ${!item.isFunctional ? "is-placeholder" : ""
+                    }`}
                   onClick={() => handleItemClick(item)}
                 >
                   <span className="nav-btn-icon">{item.icon}</span>
