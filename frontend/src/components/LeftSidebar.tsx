@@ -20,7 +20,6 @@ const NAV_ITEMS: NavItemDef[] = [
   { key: "dashboard", label: "Dashboard", icon: "📊", isFunctional: true },
   { key: "my-digest", label: "My Digest", icon: "📰", isFunctional: true },
   { key: "interests", label: "Interests", icon: "🎯", isFunctional: true },
-  { key: "sources", label: "Sources", icon: "📡", isFunctional: false },
   { key: "saved", label: "Saved", icon: "🔖", isFunctional: true },
   { key: "history", label: "History", icon: "🕒", isFunctional: true },
   { key: "voice-digest", label: "Voice Digest", icon: "🎙️", isFunctional: true },

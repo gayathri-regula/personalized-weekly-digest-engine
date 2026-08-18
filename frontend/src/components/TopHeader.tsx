@@ -4,13 +4,11 @@ import { User } from "../types";
 interface TopHeaderProps {
   user: User | null;
   onOpenDrawer: () => void;
-  onShowToast: (message: string) => void;
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
   user,
   onOpenDrawer,
-  onShowToast,
 }) => {
   const getGreetingTime = (): string => {
     const hour = new Date().getHours();
@@ -32,42 +30,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         </p>
       </div>
 
-      {/* Center Search Bar (Visual Placeholder, Light Styling) */}
-      <div className="redesign-header-search">
-        <div
-          className="redesign-search-box"
-          onClick={() =>
-            onShowToast("This feature is scheduled for a future update.")
-          }
-          title="Global Search (Coming Soon)"
-        >
-          <span className="search-box-icon">🔍</span>
-          <input
-            type="text"
-            className="search-box-input"
-            placeholder="Search digest stories, topics, tags..."
-            disabled
-            readOnly
-          />
-          <span className="search-box-shortcut">⌘K</span>
-        </div>
-      </div>
-
-      {/* Right Controls (Notification Bell & Profile Avatar) */}
+      {/* Right Controls (Profile Avatar) */}
       <div className="redesign-header-controls">
-        <button
-          type="button"
-          className="btn-header-bell"
-          onClick={() =>
-            onShowToast("This feature is scheduled for a future update.")
-          }
-          title="Notifications (Coming Soon)"
-          aria-label="Notifications"
-        >
-          <span className="bell-icon-text">🔔</span>
-          <span className="bell-badge-count">3</span>
-        </button>
-
         <button
           type="button"
           className="btn-header-avatar"
@@ -85,3 +49,4 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     </header>
   );
 };
+

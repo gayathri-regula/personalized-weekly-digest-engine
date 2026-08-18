@@ -86,7 +86,6 @@ export const App: React.FC = () => {
             <TopHeader
               user={selectedUser}
               onOpenDrawer={() => setIsDrawerOpen(true)}
-              onShowToast={showToast}
             />
 
             {/* Redesigned Main Digest / Saved / History Display Area */}
