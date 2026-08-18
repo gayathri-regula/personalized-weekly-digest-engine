@@ -140,4 +140,12 @@ export interface SharedDigest {
   ai_suggestions?: AISuggestion[];
 }
 
+export interface TrendingTopic {
+  category: string;
+  direction: "up" | "down" | "flat";
+  current_count: number;
+  previous_count: number;
+}
+
+
 

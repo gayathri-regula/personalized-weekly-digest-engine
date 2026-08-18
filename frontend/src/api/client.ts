@@ -9,6 +9,7 @@ import {
   SavedItemResponse,
   ShareLinkResponse,
   SharedDigest,
+  TrendingTopic,
   User,
   UserPreferencesPayload,
   UsersListResponse,
@@ -542,6 +543,33 @@ export async function getDigestVoice(userId: string): Promise<Blob> {
     );
   }
 }
+
+/**
+ * Fetch week-over-week trending content topics for a user.
+ */
+export async function getTrendingTopics(userId: string): Promise<TrendingTopic[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/digest/${userId}/trending`);
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const detail = errData.detail || `HTTP ${response.status}`;
+      throw new ApiError(
+        `Failed to fetch trending topics: ${detail}`,
+        response.status
+      );
+    }
+    return await response.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(
+      "Unable to connect to backend server while fetching trending topics.",
+      0
+    );
+  }
+}
+
 
 
 

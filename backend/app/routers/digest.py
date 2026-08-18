@@ -1,11 +1,12 @@
 """FastAPI router for weekly digest generation and retrieval endpoints."""
 
 from datetime import datetime, timezone
-from typing import Optional
+from typing import List, Optional
 from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.constants import INTEREST_TAXONOMY
 from app.db.session import get_db
@@ -20,6 +21,7 @@ from app.schemas.digest import (
     BoostedDigestResponse,
     DigestItemResponse,
     DigestResponse,
+    TrendingItemResponse,
 )
 from app.services.ai_digest_generator import generate_ai_digest_items
 from app.services.ai_suggestions import generate_ai_suggestions
@@ -323,6 +325,89 @@ async def get_user_digest_voice(
         media_type="audio/wav",
         headers={"Content-Disposition": f"inline; filename=digest_voice_{user_id}.wav"},
     )
+
+
+@router.get("/{user_id}/trending", response_model=List[TrendingItemResponse])
+async def get_user_trending_topics(
+    user_id: str, db: AsyncSession = Depends(get_db)
+) -> List[TrendingItemResponse]:
+    """Get week-over-week trending content categories for a user."""
+    # 1. Confirm user exists (404 if not found)
+    user_stmt = select(User).where(User.id == user_id)
+    user_res = await db.execute(user_stmt)
+    user = user_res.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User '{user_id}' not found",
+        )
+
+    # 2. Fetch user's digests ordered by generated_at descending (limit 2) with items and activity_item
+    digest_stmt = (
+        select(Digest)
+        .options(selectinload(Digest.items).selectinload(DigestItem.activity_item))
+        .where(Digest.user_id == user_id)
+        .order_by(Digest.generated_at.desc())
+        .limit(2)
+    )
+    digest_res = await db.execute(digest_stmt)
+    digests = digest_res.scalars().all()
+
+    # 3. If fewer than 2 digests exist, return empty list (200 OK)
+    if len(digests) < 2:
+        return []
+
+    current_digest = digests[0]
+    previous_digest = digests[1]
+
+    def count_categories(digest: Digest) -> dict[str, int]:
+        counts: dict[str, int] = {}
+        for ditem in digest.items:
+            act = ditem.activity_item
+            if not act:
+                continue
+            cat = None
+            if act.category_tags and isinstance(act.category_tags, list) and len(act.category_tags) > 0:
+                cat = act.category_tags[0]
+            elif act.section_title:
+                cat = act.section_title
+            else:
+                cat = "General"
+            counts[cat] = counts.get(cat, 0) + 1
+        return counts
+
+    curr_counts = count_categories(current_digest)
+    prev_counts = count_categories(previous_digest)
+
+    all_categories = set(curr_counts.keys()).union(set(prev_counts.keys()))
+    results: List[TrendingItemResponse] = []
+
+    for cat in all_categories:
+        curr = curr_counts.get(cat, 0)
+        prev = prev_counts.get(cat, 0)
+
+        if prev == 0:
+            direction = "flat"
+        elif curr > prev:
+            direction = "up"
+        elif curr < prev:
+            direction = "down"
+        else:
+            direction = "flat"
+
+        results.append(
+            TrendingItemResponse(
+                category=cat,
+                direction=direction,
+                current_count=curr,
+                previous_count=prev,
+            )
+        )
+
+    # Sort by current_count descending, then category name ascending
+    results.sort(key=lambda x: (-x.current_count, x.category))
+
+    return results[:5]
 
 
 @router.get("/{user_id}", response_model=DigestResponse)

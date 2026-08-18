@@ -134,3 +134,15 @@ class SharedDigestResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
+class TrendingItemResponse(BaseModel):
+    """Schema representing a category trend comparison between current and previous week."""
+
+    category: str = Field(..., description="Content category name")
+    direction: str = Field(..., description="Trend direction: 'up', 'down', or 'flat'")
+    current_count: int = Field(..., description="Number of items in current week's digest")
+    previous_count: int = Field(..., description="Number of items in previous week's digest")
+
+    model_config = ConfigDict(from_attributes=True)
+
+

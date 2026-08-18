@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { getActivityLog, getDigestVoice, getOrCreateShareLink, updateUserPreferences } from "../api/client";
-import { ActivityLogEntry, Digest, User } from "../types";
+import { getActivityLog, getDigestVoice, getOrCreateShareLink, getTrendingTopics, updateUserPreferences } from "../api/client";
+import { ActivityLogEntry, Digest, TrendingTopic, User } from "../types";
 
 interface RightSidebarProps {
   user: User | null;
@@ -35,6 +35,10 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
 
+  // Trending Topics state
+  const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
+  const [loadingTrending, setLoadingTrending] = useState<boolean>(false);
+
   useEffect(() => {
     // Reset and cleanup audio when selected user or digest changes
     if (audioRef.current) {
@@ -53,11 +57,19 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
       setContentLength(user.content_length || "detailed");
       setLanguage(user.digest_language || "en");
       setShareUrl("");
+
+      setLoadingTrending(true);
+      getTrendingTopics(user.id)
+        .then((data) => setTrendingTopics(data))
+        .catch(() => setTrendingTopics([]))
+        .finally(() => setLoadingTrending(false));
     } else {
       setFrequency("weekly");
       setContentLength("detailed");
       setLanguage("en");
       setShareUrl("");
+      setTrendingTopics([]);
+      setLoadingTrending(false);
     }
   }, [user, digest]);
 
@@ -274,6 +286,48 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
           </div>
         ) : (
           <p className="panel-empty-desc">No interest topics configured yet.</p>
+        )}
+      </div>
+
+      {/* Panel 2.5: Trending in Your Topics */}
+      <div className="right-panel-card trending-panel">
+        <div className="right-panel-header">
+          <span className="panel-header-icon">📈</span>
+          <h3 className="panel-header-title">Trending in Your Topics</h3>
+        </div>
+
+        {loadingTrending ? (
+          <p className="panel-empty-desc">Loading trends...</p>
+        ) : trendingTopics.length > 0 ? (
+          <div className="trending-topics-list">
+            {trendingTopics.map((topic) => {
+              const arrow =
+                topic.direction === "up"
+                  ? "↑"
+                  : topic.direction === "down"
+                  ? "↓"
+                  : "→";
+              const directionClass =
+                topic.direction === "up"
+                  ? "trend-up"
+                  : topic.direction === "down"
+                  ? "trend-down"
+                  : "trend-flat";
+              return (
+                <div key={topic.category} className="trending-topic-row">
+                  <div className="trending-topic-info">
+                    <span className={`trending-arrow ${directionClass}`}>{arrow}</span>
+                    <span className="trending-category-name">{topic.category}</span>
+                  </div>
+                  <span className="trending-count-badge">
+                    {topic.current_count} {topic.current_count === 1 ? "story" : "stories"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="panel-empty-desc">Not enough data yet — check back next week</p>
         )}
       </div>
 

@@ -4057,6 +4057,69 @@
   background: linear-gradient(135deg, #047857 0%, #065f46 100%);
 }
 
+/* Trending in Your Topics Panel */
+.trending-topics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.25rem;
+}
+
+.trending-topic-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.65rem;
+  background: #f8fafc;
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  transition: border-color 0.2s ease;
+}
+
+.trending-topic-row:hover {
+  border-color: #cbd5e1;
+}
+
+.trending-topic-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trending-arrow {
+  font-size: 0.95rem;
+  width: 16px;
+  text-align: center;
+}
+
+.trending-arrow.trend-up {
+  color: var(--success-color, #10b981);
+  font-weight: 700;
+}
+
+.trending-arrow.trend-down {
+  color: var(--error-color, #ef4444);
+  font-weight: 700;
+}
+
+.trending-arrow.trend-flat {
+  color: var(--text-muted, #64748b);
+  font-weight: 700;
+}
+
+.trending-category-name {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.trending-count-badge {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+
 
 
 
