@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { getActivityLog } from "../api/client";
 import { ActivityLogEntry, User } from "../types";
+import { BookmarkIcon, HistoryIcon } from "./icons/NavIcons";
 
 interface ActivityHistoryViewProps {
   user: User | null;
   onOpenDrawer: () => void;
 }
 
-const getEventIcon = (eventType: string): string => {
+const getEventIcon = (eventType: string): React.ReactNode => {
   switch (eventType) {
     case "digest_generated":
       return "✨";
     case "item_saved":
     case "item_unsaved":
-      return "🔖";
+      return <BookmarkIcon className="timeline-icon-svg" />;
     case "feedback_submitted":
       return "👍";
     case "interests_updated":
@@ -91,7 +92,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
       <div className="activity-history-view">
         <div className="activity-history-header">
           <div className="activity-title-group">
-            <span className="activity-header-icon">🕒</span>
+            <span className="activity-header-icon"><HistoryIcon /></span>
             <h2 className="activity-main-heading">Activity History</h2>
             <span className="activity-count-badge">Loading...</span>
           </div>
@@ -125,7 +126,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
     <div className="activity-history-view">
       <div className="activity-history-header">
         <div className="activity-title-group">
-          <span className="activity-header-icon">🕒</span>
+          <span className="activity-header-icon"><HistoryIcon /></span>
           <h2 className="activity-main-heading">Activity History</h2>
           <span className="activity-count-badge">
             {activities.length} {activities.length === 1 ? "Event" : "Events"}

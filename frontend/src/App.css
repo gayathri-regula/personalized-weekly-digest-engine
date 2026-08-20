@@ -2003,7 +2003,43 @@
 .nav-btn-icon {
   font-size: 1.05rem;
   width: 20px;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  display: block;
+}
+
+.panel-header-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+}
+
+.saved-header-icon svg,
+.activity-header-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: block;
+}
+
+.btn-icon-svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.sidebar-act-icon-svg,
+.timeline-icon-svg {
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .nav-btn-label {

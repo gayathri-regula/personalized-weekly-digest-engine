@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getSavedItems, unsaveItem } from "../api/client";
 import { SavedItemDetail, User } from "../types";
 import { getCategoryTheme } from "../utils/categoryIcons";
+import { BookmarkIcon } from "./icons/NavIcons";
 
 interface SavedItemsViewProps {
   user: User | null;
@@ -75,7 +76,7 @@ export const SavedItemsView: React.FC<SavedItemsViewProps> = ({
       <div className="saved-items-view">
         <div className="saved-items-header">
           <div className="saved-title-group">
-            <span className="saved-header-icon">🔖</span>
+            <span className="saved-header-icon"><BookmarkIcon /></span>
             <h2 className="saved-main-heading">Saved Reading List</h2>
             <span className="saved-count-badge">Loading...</span>
           </div>
@@ -109,7 +110,7 @@ export const SavedItemsView: React.FC<SavedItemsViewProps> = ({
     <div className="saved-items-view">
       <div className="saved-items-header">
         <div className="saved-title-group">
-          <span className="saved-header-icon">🔖</span>
+          <span className="saved-header-icon"><BookmarkIcon /></span>
           <h2 className="saved-main-heading">Saved Reading List</h2>
           <span className="saved-count-badge">
             {items.length} {items.length === 1 ? "Item" : "Items"}
@@ -122,7 +123,7 @@ export const SavedItemsView: React.FC<SavedItemsViewProps> = ({
           <span className="saved-empty-icon">📚</span>
           <h3>No saved items yet</h3>
           <p>
-            Click the 🔖 <strong>Save</strong> button on any story in your weekly digest to bookmark it here for quick reading later.
+            Click the <BookmarkIcon style={{ display: "inline-block", verticalAlign: "middle", width: "1em", height: "1em" }} /> <strong>Save</strong> button on any story in your weekly digest to bookmark it here for quick reading later.
           </p>
         </div>
       ) : (
@@ -187,7 +188,7 @@ export const SavedItemsView: React.FC<SavedItemsViewProps> = ({
                       onClick={() => handleUnsave(item.activity_item_id)}
                       title="Remove story from saved list"
                     >
-                      🔖 Unsave
+                      <BookmarkIcon className="btn-icon-svg" /> Unsave
                     </button>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getActivityLog, getDigestVoice, getOrCreateShareLink, getTrendingTopics, updateUserPreferences } from "../api/client";
 import { ActivityLogEntry, Digest, TrendingTopic, User } from "../types";
+import { BookmarkIcon, HistoryIcon } from "./icons/NavIcons";
 
 interface RightSidebarProps {
   user: User | null;
@@ -432,7 +433,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
       {/* Panel 5: Recent Activity */}
       <div className="right-panel-card activity-panel">
         <div className="right-panel-header">
-          <span className="panel-header-icon">🕒</span>
+          <span className="panel-header-icon"><HistoryIcon /></span>
           <h3 className="panel-header-title">Recent Activity</h3>
         </div>
 
@@ -449,9 +450,9 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         ) : (
           <div className="sidebar-activity-list">
             {recentActivities.map((act) => {
-              let icon = "📝";
+              let icon: React.ReactNode = "📝";
               if (act.event_type === "digest_generated") icon = "✨";
-              else if (act.event_type.includes("saved")) icon = "🔖";
+              else if (act.event_type.includes("saved")) icon = <BookmarkIcon className="sidebar-act-icon-svg" />;
               else if (act.event_type.includes("feedback")) icon = "👍";
               else if (act.event_type.includes("interests")) icon = "🎯";
 

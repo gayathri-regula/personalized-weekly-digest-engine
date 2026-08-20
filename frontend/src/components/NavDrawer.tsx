@@ -1,18 +1,19 @@
 import React, { useEffect } from "react";
+import { BookmarkIcon, HistoryIcon, VoiceIcon } from "./icons/NavIcons";
 
 export interface NavItemDef {
   key: string;
   label: string;
-  icon: string;
+  icon: React.ReactNode;
   isFunctional: boolean;
 }
 
 export const NAV_ITEMS: NavItemDef[] = [
   { key: "dashboard", label: "Dashboard", icon: "📊", isFunctional: true },
   { key: "interests", label: "Interests", icon: "🎯", isFunctional: true },
-  { key: "saved", label: "Saved", icon: "🔖", isFunctional: true },
-  { key: "history", label: "History", icon: "🕒", isFunctional: true },
-  { key: "voice-digest", label: "Voice Digest", icon: "🎙️", isFunctional: true },
+  { key: "saved", label: "Saved", icon: <BookmarkIcon />, isFunctional: true },
+  { key: "history", label: "History", icon: <HistoryIcon />, isFunctional: true },
+  { key: "voice-digest", label: "Voice Digest", icon: <VoiceIcon />, isFunctional: true },
 ];
 
 interface NavDrawerProps {

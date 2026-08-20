@@ -1,6 +1,7 @@
 import React from "react";
 import { DigestSection } from "../utils/groupDigestItems";
 import { getCategoryTheme } from "../utils/categoryIcons";
+import { BookmarkIcon } from "./icons/NavIcons";
 
 interface StoryListProps {
   sections: DigestSection[];
@@ -165,7 +166,15 @@ export const StoryList: React.FC<StoryListProps> = ({
                             onClick={() => onToggleSave(item.activity_item_id)}
                             title={isSaved ? "Remove from Saved" : "Save story"}
                           >
-                            {isSaved ? "🔖 Saved" : "🔖 Save"}
+                            {isSaved ? (
+                              <>
+                                <BookmarkIcon className="btn-icon-svg" /> Saved
+                              </>
+                            ) : (
+                              <>
+                                <BookmarkIcon className="btn-icon-svg" /> Save
+                              </>
+                            )}
                           </button>
                         </div>
                       </div>
