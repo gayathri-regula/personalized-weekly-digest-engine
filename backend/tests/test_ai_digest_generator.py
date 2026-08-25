@@ -107,7 +107,7 @@ def test_generate_ai_digest_items_uses_fallback_when_llm_fails():
 
 
 def test_call_llm_ai_digest_generator_mock_success():
-    """Test call_llm_ai_digest_generator with a mocked OpenAI response including section_title."""
+    """Test call_llm_ai_digest_generator with a mocked Groq response including section_title."""
     mock_client = MagicMock()
     mock_response = MagicMock()
 

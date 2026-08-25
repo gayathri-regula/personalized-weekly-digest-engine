@@ -40,7 +40,7 @@ def test_generate_ai_suggestions_use_llm_false():
 
 
 def test_generate_ai_suggestions_missing_api_key(monkeypatch):
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
     suggestions = generate_ai_suggestions("Charlie", ["Security"], use_llm=True)
     assert len(suggestions) == 3
     for s in suggestions:

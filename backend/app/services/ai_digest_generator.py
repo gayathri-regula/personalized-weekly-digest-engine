@@ -17,7 +17,7 @@ from app.utils import get_reference_now
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_OPENAI_MODEL: str = "gpt-4o-mini"
+DEFAULT_GROQ_MODEL: str = "llama-3.3-70b-versatile"
 DEFAULT_TIMEOUT_SECONDS: float = 15.0
 
 # Exploratory topics for fallback generation outside standard taxonomy tags
@@ -461,13 +461,13 @@ def call_llm_ai_digest_generator(
     client: Optional[Any] = None,
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
 ) -> List[Dict[str, Any]]:
-    """Execute API request to OpenAI LLM to generate target_count open-ended activity items.
+    """Execute API request to Groq LLM to generate target_count open-ended activity items.
 
     Args:
         user_name: Name of target user.
         interest_tags: List of interest tags.
         target_count: Target number of items (default 5).
-        client: Optional injected OpenAI client or mock client.
+        client: Optional injected Groq client or mock client.
         timeout: API call timeout in seconds.
 
     Returns:
@@ -479,17 +479,17 @@ def call_llm_ai_digest_generator(
     prompt = build_ai_digest_prompt(user_name, interest_tags, target_count=target_count)
 
     if client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             raise ValueError(
-                "OPENAI_API_KEY environment variable is missing or empty."
+                "GROQ_API_KEY environment variable is missing or empty."
             )
-        from openai import OpenAI
+        import groq
 
-        client = OpenAI(api_key=api_key, timeout=timeout)
+        client = groq.Groq(api_key=api_key, timeout=timeout)
 
     response = client.chat.completions.create(
-        model=DEFAULT_OPENAI_MODEL,
+        model=DEFAULT_GROQ_MODEL,
         max_tokens=1200,
         temperature=0.7,
         messages=[{"role": "user", "content": prompt}],
@@ -565,7 +565,7 @@ def call_llm_ai_digest_generator(
                 )
             return results
 
-    raise RuntimeError(f"OpenAI API response did not contain {target_count} valid generated item objects.")
+    raise RuntimeError(f"Groq API response did not contain {target_count} valid generated item objects.")
 
 
 def generate_ai_digest_items(
@@ -577,7 +577,7 @@ def generate_ai_digest_items(
 ) -> List[Dict[str, Any]]:
     """Generate AI activity items for a user's digest (60/40 interest/explore ratio).
 
-    Primary path calls OpenAI LLM API. Fallback path produces synthetic
+    Primary path calls Groq LLM API. Fallback path produces synthetic
     activity items if LLM is disabled or fails.
 
     Args:

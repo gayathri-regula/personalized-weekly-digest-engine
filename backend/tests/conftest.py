@@ -35,7 +35,6 @@ def clear_llm_api_keys(monkeypatch):
     """Ensure LLM API keys are unset for every test to enforce deterministic fallback isolation."""
     monkeypatch.delenv("GROQ_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
 
 
 @pytest.fixture(autouse=True)

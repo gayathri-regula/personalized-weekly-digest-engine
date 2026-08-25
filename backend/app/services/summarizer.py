@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 # Default Groq model
-DEFAULT_OPENAI_MODEL: str = "gpt-4o-mini"
+DEFAULT_GROQ_MODEL: str = "llama-3.3-70b-versatile"
 DEFAULT_TIMEOUT_SECONDS: float = 15.0
 
 
@@ -95,12 +95,12 @@ def call_llm_summarizer(
     client: Optional[Any] = None,
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
 ) -> str:
-    """Execute API request to OpenAI LLM to generate digest summary prose.
+    """Execute API request to Groq LLM to generate digest summary prose.
 
     Args:
         user_name: Name of the target user.
         ranked_items_with_details: Joined list of items with details.
-        client: Optional injected OpenAI client or mock client for testing.
+        client: Optional injected Groq client or mock client for testing.
         timeout: API call timeout in seconds.
 
     Returns:
@@ -112,18 +112,18 @@ def call_llm_summarizer(
     prompt = build_claude_prompt(user_name, ranked_items_with_details)
 
     if client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             raise ValueError(
-                "OPENAI_API_KEY environment variable is missing or empty."
+                "GROQ_API_KEY environment variable is missing or empty."
             )
-        from openai import OpenAI
+        import groq
 
-        client = OpenAI(api_key=api_key, timeout=timeout)
+        client = groq.Groq(api_key=api_key, timeout=timeout)
 
     # Call chat completions API
     response = client.chat.completions.create(
-        model=DEFAULT_OPENAI_MODEL,
+        model=DEFAULT_GROQ_MODEL,
         max_tokens=300,
         temperature=0.7,
         messages=[{"role": "user", "content": prompt}],
@@ -139,7 +139,7 @@ def call_llm_summarizer(
             if isinstance(msg, dict) and "content" in msg and msg["content"]:
                 return msg["content"].strip()
 
-    raise RuntimeError("Unexpected response structure from OpenAI API.")
+    raise RuntimeError("Unexpected response structure from Groq API.")
 
 
 def generate_digest_summary(
@@ -150,14 +150,14 @@ def generate_digest_summary(
 ) -> str:
     """Generate a digest summary prose string for a user's top-ranked items.
 
-    Primary path uses OpenAI LLM. Fallback path produces structured Markdown
+    Primary path uses Anthropic Claude LLM. Fallback path produces structured Markdown
     if use_llm is False or if any LLM API error occurs.
 
     Args:
         user_name: Name of the target user.
         ranked_items_with_details: List of top ranked items joined with titles/content.
         use_llm: Whether to attempt LLM generation (default True).
-        client: Optional injected OpenAI client or mock client.
+        client: Optional injected Anthropic client or mock client.
 
     Returns:
         str: Executive summary prose or template markdown summary.
