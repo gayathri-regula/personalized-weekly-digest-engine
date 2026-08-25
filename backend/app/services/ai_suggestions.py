@@ -13,7 +13,7 @@ from app.constants import INTEREST_TAXONOMY
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_GROQ_MODEL: str = "llama-3.3-70b-versatile"
+DEFAULT_OPENAI_MODEL: str = "gpt-4o-mini"
 DEFAULT_TIMEOUT_SECONDS: float = 15.0
 
 
@@ -88,12 +88,12 @@ def call_llm_ai_suggestions(
     client: Optional[Any] = None,
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
 ) -> List[Dict[str, str]]:
-    """Execute API request to Groq LLM to generate exploratory suggestions.
+    """Execute API request to OpenAI LLM to generate exploratory suggestions.
 
     Args:
         user_name: Name of target user.
         interest_tags: List of interest tags.
-        client: Optional injected Groq client or mock client.
+        client: Optional injected OpenAI client or mock client.
         timeout: API call timeout in seconds.
 
     Returns:
@@ -102,15 +102,15 @@ def call_llm_ai_suggestions(
     prompt = build_ai_suggestions_prompt(user_name, interest_tags)
 
     if client is None:
-        api_key = os.getenv("GROQ_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise ValueError("GROQ_API_KEY environment variable is missing or empty.")
-        import groq
+            raise ValueError("OPENAI_API_KEY environment variable is missing or empty.")
+        from openai import OpenAI
 
-        client = groq.Groq(api_key=api_key, timeout=timeout)
+        client = OpenAI(api_key=api_key, timeout=timeout)
 
     response = client.chat.completions.create(
-        model=DEFAULT_GROQ_MODEL,
+        model=DEFAULT_OPENAI_MODEL,
         max_tokens=400,
         temperature=0.7,
         messages=[{"role": "user", "content": prompt}],
@@ -155,7 +155,7 @@ def call_llm_ai_suggestions(
             if len(suggestions) == 3:
                 return suggestions
 
-    raise RuntimeError("Groq API response did not contain 3 valid suggestion objects with valid taxonomy related_tag.")
+    raise RuntimeError("OpenAI API response did not contain 3 valid suggestion objects with valid taxonomy related_tag.")
 
 
 def generate_ai_suggestions(
@@ -166,7 +166,7 @@ def generate_ai_suggestions(
 ) -> List[Dict[str, str]]:
     """Generate 3 exploratory topic suggestions for a user.
 
-    Primary path calls Anthropic Claude API. Fallback path produces deterministic
+    Primary path calls OpenAI LLM API. Fallback path produces deterministic
     suggestions matching user's interest tags if LLM is disabled or fails.
 
     Args:

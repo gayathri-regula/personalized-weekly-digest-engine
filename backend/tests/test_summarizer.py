@@ -1,4 +1,4 @@
-"""Formal unit tests for the summarizer service (using mocked Anthropic client, no network calls)."""
+"""Formal unit tests for the summarizer service (using mocked OpenAI client, no network calls)."""
 
 from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
@@ -34,7 +34,7 @@ def sample_items_with_details() -> List[Dict[str, Any]]:
 
 
 def test_generate_digest_summary_llm_success(sample_items_with_details):
-    """Test LLM path when mocked Groq client returns valid prose."""
+    """Test LLM path when mocked OpenAI client returns valid prose."""
     mock_client = MagicMock()
     mock_response = MagicMock()
     mock_choice = MagicMock()
@@ -106,7 +106,7 @@ def test_empty_ranked_items_edge_case():
 
 
 def test_missing_api_key_triggers_fallback(sample_items_with_details):
-    """Test that missing GROQ_API_KEY triggers fallback gracefully."""
+    """Test that missing OPENAI_API_KEY triggers fallback gracefully."""
     with patch.dict("os.environ", {}, clear=True):
         summary = generate_digest_summary(
             user_name="Charlie Davis",
