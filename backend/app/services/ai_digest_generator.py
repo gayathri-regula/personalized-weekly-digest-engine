@@ -601,10 +601,14 @@ def generate_ai_digest_items(
             if items and len(items) == target_count:
                 return items
         except Exception as exc:
+            cause_type = type(exc.__cause__).__name__ if exc.__cause__ else None
             logger.warning(
-                "LLM AI digest generation failed for user '%s': %s. Using synthetic fallback items.",
+                "LLM AI digest generation failed for user '%s': %s: %r (cause: %s: %r). Using synthetic fallback items.",
                 user_name,
+                type(exc).__name__,
                 exc,
+                cause_type,
+                exc.__cause__,
             )
 
     return generate_fallback_ai_digest_items(user_name, interest_tags, target_count=target_count)

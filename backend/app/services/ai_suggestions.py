@@ -188,10 +188,14 @@ def generate_ai_suggestions(
             if suggestions and len(suggestions) == 3:
                 return suggestions
         except Exception as exc:
+            cause_type = type(exc.__cause__).__name__ if exc.__cause__ else None
             logger.warning(
-                "LLM AI suggestions generation failed for user '%s': %s. Using fallback suggestions.",
+                "LLM AI suggestions generation failed for user '%s': %s: %r (cause: %s: %r). Using fallback suggestions.",
                 user_name,
+                type(exc).__name__,
                 exc,
+                cause_type,
+                exc.__cause__,
             )
 
     return generate_fallback_ai_suggestions(interest_tags)

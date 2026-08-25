@@ -176,10 +176,14 @@ def generate_digest_summary(
             if summary_prose:
                 return summary_prose
         except Exception as exc:
+            cause_type = type(exc.__cause__).__name__ if exc.__cause__ else None
             logger.warning(
-                "LLM summarizer failed for user '%s': %s. Falling back to template summary.",
+                "LLM summarizer failed for user '%s': %s: %r (cause: %s: %r). Falling back to template summary.",
                 user_name,
+                type(exc).__name__,
                 exc,
+                cause_type,
+                exc.__cause__,
             )
 
     # Fallback path (ARCHITECTURE.md Section 4.2 & 10.3)

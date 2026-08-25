@@ -1,10 +1,13 @@
 """Service for generating Text-to-Speech voice audio from digest summary prose using Groq API."""
 
 import io
+import logging
 import os
 import re
 import wave
 from typing import Any, List, Optional
+
+logger = logging.getLogger(__name__)
 
 
 def chunk_text(text: str, max_chars: int = 200) -> List[str]:
@@ -167,5 +170,16 @@ def generate_voice_digest(
 
         return stitch_wav_chunks(audio_chunks)
     except Exception as exc:
-        raise RuntimeError(f"Groq Voice TTS generation failed: {exc}") from exc
+        cause_type = type(exc.__cause__).__name__ if exc.__cause__ else None
+        logger.error(
+            "Groq Voice TTS generation failed: %s: %r (cause: %s: %r)",
+            type(exc).__name__,
+            exc,
+            cause_type,
+            exc.__cause__,
+        )
+        raise RuntimeError(
+            f"Groq Voice TTS generation failed: {type(exc).__name__}: {exc!r} "
+            f"(cause: {cause_type}: {exc.__cause__!r})"
+        ) from exc
 
